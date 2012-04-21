@@ -15,6 +15,6 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 --
 -- Eric Wykoff "edge2054"
--- edge2054@gmai.com
+-- edge2054@gmail.com
 
 load("/data/general/npcs/kobold.lua")
