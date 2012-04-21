@@ -33,8 +33,8 @@ return {
 			noise = "fbm_perlin",
 			floor = "GRASS",
 			wall = "TREE",
-			up = "UP",
-			down = "DOWN",
+			up = "UP_FOREST",
+			down = "DOWN_FOREST",
 			door = "DOOR",
 		},
 		actor = {
