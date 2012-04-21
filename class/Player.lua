@@ -19,8 +19,10 @@
 
 require "engine.class"
 require "mod.class.Actor"
+-- require "mod.class.Object"
 require "engine.interface.PlayerRest"
 require "engine.interface.PlayerRun"
+require "engine.interface.PlayerSlide"
 require "engine.interface.PlayerMouse"
 require "engine.interface.PlayerHotkeys"
 local Map = require "engine.Map"
@@ -29,6 +31,7 @@ local ActorTalents = require "engine.interface.ActorTalents"
 local DeathDialog = require "mod.dialogs.DeathDialog"
 local Astar = require"engine.Astar"
 local DirectPath = require"engine.DirectPath"
+local Particles = require "engine.Particles"
 
 --- Defines the player
 -- It is a normal actor, with some redefined methods to handle user interaction.<br/>
@@ -37,21 +40,24 @@ module(..., package.seeall, class.inherit(
 	mod.class.Actor,
 	engine.interface.PlayerRest,
 	engine.interface.PlayerRun,
+	engine.interface.PlayerSlide,
 	engine.interface.PlayerMouse,
 	engine.interface.PlayerHotkeys
 ))
 
 function _M:init(t, no_default)
 	t.display=t.display or '@'
-	t.color_r=t.color_r or 230
-	t.color_g=t.color_g or 230
-	t.color_b=t.color_b or 230
+	t.color_r=t.color_r or 240
+	t.color_g=t.color_g or 240
+	t.color_b=t.color_b or 240
 
 	t.player = true
 	t.type = t.type or "humanoid"
 	t.subtype = t.subtype or "player"
 	t.faction = t.faction or "players"
-
+	
+	t.name = "Alex"
+	
 	t.lite = t.lite or 0
 
 	mod.class.Actor.init(self, t, no_default)
@@ -61,10 +67,20 @@ function _M:init(t, no_default)
 end
 
 function _M:move(x, y, force)
+	local ox, oy = self.x, self.y
 	local moved = mod.class.Actor.move(self, x, y, force)
+	
+	if not force and ox == self.x and oy == self.y and self.doPlayerSlide then
+		self.doPlayerSlide = nil
+		tx, ty = self:tryPlayerSlide(x, y, false)
+		if tx then moved = self:move(tx, ty, false) end
+	end
+	self.doPlayerSlide = nil
+	
 	if moved then
 		game.level.map:moveViewSurround(self.x, self.y, 8, 8)
 	end
+	
 	return moved
 end
 

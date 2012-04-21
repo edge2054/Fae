@@ -22,35 +22,21 @@ newBirthDescriptor{
 	name = "base",
 	desc = {
 	},
-	experience = 1.0,
-
+		
 	copy = {
-		max_level = 10,
-		lite = 4,
-		max_life = 25,
+		lite = 3,
+		max_life = 100,
+		max_rage = 100,
+		life_regen = 1,
+		desc = "I find myself lost.  A stranger in a strange land.  My only hope is to press forward and find a way home.",
 	},
 }
 
 newBirthDescriptor{
 	type = "role",
-	name = "Destroyer",
+	name = "Rogue",
 	desc =
 	{
-		"Crashhhhh!",
-	},
-	talents = {
-		[ActorTalents.T_KICK]=1,
-	},
-}
-
-newBirthDescriptor{
-	type = "role",
-	name = "Acid-maniac",
-	desc =
-	{
-		"Zshhhhhhhh!",
-	},
-	talents = {
-		[ActorTalents.T_ACID_SPRAY]=1,
+		"I find myself lost.  A stranger in a strange land.  My only hope is to press forward and find a way home.",
 	},
 }
