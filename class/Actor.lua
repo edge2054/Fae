@@ -96,21 +96,35 @@ function _M:move(x, y, force)
 	return moved
 end
 
+function _M:colorLife()
+	local missing_life = self.max_life - self.life
+	local color
+	
+	if missing_life == 0 then
+		color = 'WHITE'
+	elseif missing_life <= self.max_life * 0.25 then
+		color = 'YELLOW'
+	elseif missing_life <= self.max_life * 0.5 then
+		color = 'ORANGE'
+	elseif missing_life <= self.max_life * 0.75 then
+		color = 'RED'
+	else
+		color = 'DARK_RED'
+	end
+	return color
+end
+
+-- TODO: VERBOSE when holding down control?
 function _M:tooltip()
-	return ([[%s%s
-#00ffff#Level: %d
-#ff0000#HP: %d (%d%%)
-Stats: %d /  %d / %d
-%s]]):format(
-	self:getDisplayString(),
-	self.name,
-	self.level,
-	self.life, self.life * 100 / self.max_life,
-	self:getStr(),
-	self:getDex(),
-	self:getCon(),
-	self.desc or ""
-	)
+	return ([[#%s#%s#LAST#]]):format(self:colorLife(), self.name)
+--	self:getDisplayString(),
+--	self.level,
+--	self.life, self.life * 100 / self.max_life,
+--	self:getStr(),
+--	self:getDex(),
+--	self:getCon(),
+--	self.desc or ""
+	
 end
 
 function _M:onTakeHit(value, src)

@@ -38,9 +38,10 @@ local HotkeysDisplay = require "engine.HotkeysDisplay"
 local ActorsSeenDisplay = require "engine.ActorsSeenDisplay"
 local LogDisplay = require "engine.LogDisplay"
 local LogFlasher = require "engine.LogFlasher"
+
 local DebugConsole = require "engine.DebugConsole"
 local FlyingText = require "engine.FlyingText"
-local Tooltip = require "engine.Tooltip"
+local Tooltip = require "mod.class.Tooltip"
 
 local QuitDialog = require "mod.dialogs.Quit"
 

@@ -17,6 +17,8 @@
 -- Eric Wykoff "edge2054"
 -- edge2054@gmail.com
 
+-- TODO: Move displays to the top of the screen
+
 require "engine.class"
 local Mouse = require "engine.Mouse"
 
@@ -39,7 +41,7 @@ function _M:resize(x, y, w, h)
 	self.mouse.delegate_offset_y = y
 	self.w, self.h = w, h
 	self.font_w = self.font:size(" ")
-   self.surface_line = core.display.newSurface(w, self.font_h)
+	self.surface_line = core.display.newSurface(w, self.font_h)
 	self.bars_x = self.font_w * 9
 	self.bars_w = self.w - self.bars_x - 5
 	self.surface = core.display.newSurface(w, h)
@@ -97,7 +99,7 @@ function _M:display()
     local gw, gh = core.display.size()
 	local w = 10  h = 0
 
-    self:makeTexture(("Life: #LIGHT_BLUE#%d/%d   "):format(player.life, player.max_life), w, h, 220, 220, 255)
+    self:makeTexture(("Life: #%s#%d/%d   "):format(player:colorLife(), player.life, player.max_life), w, h, 220, 220, 255)
 	
 	w = 250
 	
