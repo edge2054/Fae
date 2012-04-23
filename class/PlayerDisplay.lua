@@ -24,7 +24,7 @@ local Mouse = require "engine.Mouse"
 
 module(..., package.seeall, class.make)
 
-function _M:init()
+--[[function _M:init()
 	self.font = core.display.newFont("/data/font/Monaco.TTF", 20)
 	self.font_h = self.font:lineSkip()
 
@@ -32,6 +32,17 @@ function _M:init()
 
 	local gw, gh = core.display.size()
 	self:resize(1, gh - 40, gw, 40)
+end]]
+
+function _M:init(x, y, w, h, font, size)
+	self.display_x = x
+	self.display_y = y
+	self.w, self.h = w, h
+	self.bgcolor = bgcolor
+	self.font = core.display.newFont(font or "/data/font/Monaco.TTF", size or 20)
+	self.fontbig = core.display.newFont(font or "/data/font/Monaco.TTF", (size or 20) * 2)
+	self.mouse = Mouse.new()
+	self:resize(x, y, w, h)
 end
 
 --- Resize the display area
@@ -41,7 +52,7 @@ function _M:resize(x, y, w, h)
 	self.mouse.delegate_offset_y = y
 	self.w, self.h = w, h
 	self.font_w = self.font:size(" ")
-	self.surface_line = core.display.newSurface(w, self.font_h)
+--	self.surface_line = core.display.newSurface(w, self.font_h)
 	self.bars_x = self.font_w * 9
 	self.bars_w = self.w - self.bars_x - 5
 	self.surface = core.display.newSurface(w, h)

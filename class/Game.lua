@@ -58,7 +58,7 @@ function _M:init()
 end
 
 function _M:run()
-	self.player_display = PlayerDisplay.new()
+	self.player_display = PlayerDisplay.new(0, 20, self.w, 20)
 	self.flash = LogFlasher.new(0, 0, self.w, 20, nil, nil, nil, {255,255,255}, {0,0,0})
 	self.logdisplay = LogDisplay.new(0, self.h * 0.8, self.w * 0.5, self.h * 0.2, nil, nil, nil, {255,255,255}, {30,30,30})
 	self.hotkeys_display = HotkeysDisplay.new(nil, self.w * 0.5, self.h * 0.8, self.w * 0.5, self.h * 0.2, {30,30,0})
