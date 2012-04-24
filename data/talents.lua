@@ -17,6 +17,21 @@
 -- Eric Wykoff "edge2054"
 -- edge2054@gmail.com
 
+local Entity = require "engine.Entity"
+
+local oldNewTalent = Talents.newTalent
+Talents.newTalent = function(self, t)
+	assert(engine.interface.ActorTalents.talents_types_def[t.type[1]], "No talent category "..tostring(t.type[1]).." for talent "..t.name)
+
+	if not t.image then
+		t.image = "talents/"..(t.short_name or t.name):lower():gsub("[^a-z0-9_]", "_")..".png"
+	end
+	if fs.exists("/data/gfx/"..t.image) then t.display_entity = Entity.new{image=t.image, is_talent=true}
+	else t.display_entity = Entity.new{image="talents/default.png", is_talent=true}
+	end
+	return oldNewTalent(self, t)
+end
+
 newTalentType{ type="role/combat", name = "combat", description = "Combat techniques" }
 
 newTalent{

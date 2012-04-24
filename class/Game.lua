@@ -59,12 +59,10 @@ function _M:init()
 end
 
 function _M:run()
-	local font = "/data/font/DroidSansMono.ttf"
-	local font_size = 10
 	self.player_display = PlayerDisplay.new(0, 20, self.w, 20)
 	self.flash = LogFlasher.new(0, 0, self.w, 20, nil, nil, nil, {255,255,255}, {0,0,0})
 	self.logdisplay = LogDisplay.new(0, self.h * 0.8, self.w * 0.5, self.h * 0.2, nil, nil, nil, {255,255,255}, {30,30,30})
-	self.hotkeys_display_icons = HotkeysIconsDisplay.new(nil, self.w * 0.1, self.h * 0.90, self.w * 0.5, self.h * 0.2, {255,255,255}, font, font_size, game.h * 0.06, game.h * 0.06)
+	self.hotkeys_display_icons = HotkeysIconsDisplay.new(nil, self.w * 0.1, self.h * 0.90, self.w * 0.5, self.h * 0.2, {255,255,255}, "/data/font/DroidSansMono.ttf", 10, game.h * 0.06, game.h * 0.06)
 	self.hotkeys_display_icons:enableShadow(0.6)
 	self.npcs_display = ActorsSeenDisplay.new(nil, self.w * 0.5, self.h * 0.8, self.w * 0.5, self.h * 0.2, {30,30,0})
 	self.tooltip = Tooltip.new(nil, nil, {255,255,255}, {30,30,30})
@@ -121,15 +119,15 @@ function _M:loaded()
 	Map:setViewerActor(self.player)
 	local th = 48
 	local tw = math.floor(math.sqrt(0.75) * (th + 0.5))
-	Map:setViewPort(0, 0, self.w, self.h, tw, th, nil, 48, true)
+	Map:setViewPort(0, 0, self.w * 0.8, self.h * 0.8, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
 	self.key = engine.KeyBind.new()
 end
 
 function _M:setupDisplayMode()
-	print("[DISPLAY MODE] 32x32 ASCII/background")
+--	print("[DISPLAY MODE] 32x32 ASCII/background")
 	local th = 48
 	local tw = math.floor(math.sqrt(0.75) * (th + 0.5))
-	Map:setViewPort(0, 0, self.w, self.h, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
+	Map:setViewPort(0, 0, self.w * 0.8, self.h * 0.8, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
 	Map:resetTiles()
 	Map.tiles.use_images = false
 
