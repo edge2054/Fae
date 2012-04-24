@@ -87,9 +87,6 @@ end
 function _M:act()
 	if not mod.class.Actor.act(self) then return end
 
-	-- Clean log flasher
-	game.flash:empty()
-
 	-- Resting ? Running ? Otherwise pause
 	if not self:restStep() and not self:runStep() and self.player then
 		game.paused = true

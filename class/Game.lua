@@ -38,7 +38,6 @@ local PlayerDisplay = require "mod.class.PlayerDisplay"
 local HotkeysIconsDisplay = require "engine.HotkeysIconsDisplay"
 local ActorsSeenDisplay = require "engine.ActorsSeenDisplay"
 local LogDisplay = require "engine.LogDisplay"
-local LogFlasher = require "engine.LogFlasher"
 
 local DebugConsole = require "engine.DebugConsole"
 local FlyingText = require "engine.FlyingText"
@@ -60,7 +59,6 @@ end
 
 function _M:run()
 	self.player_display = PlayerDisplay.new(0, 20, self.w, 20)
-	self.flash = LogFlasher.new(0, 0, self.w, 20, nil, nil, nil, {255,255,255}, {0,0,0})
 	self.logdisplay = LogDisplay.new(0, self.h * 0.8, self.w * 0.5, self.h * 0.2, nil, nil, nil, {255,255,255}, {30,30,30})
 	self.hotkeys_display_icons = HotkeysIconsDisplay.new(nil, self.w * 0.1, self.h * 0.90, self.w * 0.5, self.h * 0.2, {255,255,255}, "/data/font/DroidSansMono.ttf", 10, game.h * 0.06, game.h * 0.06)
 	self.hotkeys_display_icons:enableShadow(0.6)
@@ -69,11 +67,11 @@ function _M:run()
 	self.flyers = FlyingText.new()
 	self:setFlyingText(self.flyers)
 
-	self.log = function(style, ...) if type(style) == "number" then self.logdisplay(...) self.flash(style, ...) else self.logdisplay(style, ...) self.flash(self.flash.NEUTRAL, style, ...) end end
+	self.log = function(style, ...) if type(style) == "number" then self.logdisplay(...) else self.logdisplay(style, ...) end end
 	self.logSeen = function(e, style, ...) if e and self.level.map.seens(e.x, e.y) then self.log(style, ...) end end
 	self.logPlayer = function(e, style, ...) if e == self.player then self.log(style, ...) end end
 
-	self.log(self.flash.GOOD, "Welcome to #00FF00#Fae!")
+	self.log("Welcome to #00FF00#Fae!")
 
 	-- Setup inputs
 	self:setupCommands()
@@ -239,8 +237,6 @@ function _M:display(nb_keyframe)
 
 	-- We display the player's interface
 	self.player_display:toScreen(nb_keyframe)
---	self.flash:toScreen(nb_keyframe)
---	self.logdisplay:toScreen()
 	if self.show_npc_list then
 		self.npcs_display:toScreen()
 	else
@@ -394,8 +390,6 @@ function _M:setupCommands()
 		end,
 
 		LOOK_AROUND = function()
-			self.flash:empty(true)
-			self.flash(self.flash.GOOD, "Looking around... (direction keys to select interesting things, shift+direction keys to move freely)")
 			local co = coroutine.create(function() self.player:getTarget{type="hit", no_restrict=true, range=2000} end)
 			local ok, err = coroutine.resume(co)
 			if not ok and err then print(debug.traceback(co)) error(err) end
