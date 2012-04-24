@@ -18,7 +18,7 @@
 -- edge2054@gmail.com
 
 return {
-	name = "Infinite Forest",
+	name = "The Infinite Forest",
 	level_range = {1, 1},
 	max_level = 10,
 	decay = {300, 800},

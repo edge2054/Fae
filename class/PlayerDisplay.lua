@@ -107,26 +107,14 @@ function _M:display()
 	local s = self.surface
 	s:erase(0, 0, 0, 0)
 
-    local gw, gh = core.display.size()
-	local w = 10  h = 0
+    local w, h = core.display.size()
 
-    self:makeTexture(("Life: #%s#%d/%d   "):format(player:colorLife(), player.life, player.max_life), w, h, 220, 220, 255)
+    self:makeTexture(("Life: #%s#%d/%d   "):format(player:colorLife(), player.life, player.max_life), w * 0.02, h * 0.01)
 	
-	w = 250
-	
---[[	if player.raging then
-		self:makeTexture(("RAGING: #RED#%d/%d   "):format(player.rage, player.max_rage), w, h, 255, 20, 20)
-	else
-		self:makeTexture(("Rage: #CRIMSON#%d/%d   "):format(player.rage, player.max_rage), w, h, 255, 220, 220)
-	end
-   
-    w = 520
-	
-	self:makeTexture(player.stance[player.s].name, w, h, player.stance[player.s].color_r, player.stance[player.s].color_g, player.stance[player.s].color_b)]]
-   
-    w = gw - 400
-   
-	self:makeTexture(("%s"):format(game.zone.name), w, h, 240, 240, 120)
+	self:makeTexture(("#AQUAMARINE#Dreaming: #LAST#%d/%d   "):format(player.power, player.max_power), w * 0.02, h * 0.05)
+
+	-- TODO: Colored Zone Names for this display
+	self:makeTexture(("%s"):format(game.zone.name), w * 0.8, h * 0.01, 240, 240, 120)
 
 	s:updateTexture(self.texture)
 end
