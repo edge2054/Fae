@@ -109,9 +109,9 @@ function _M:display()
 
     local w, h = core.display.size()
 
-    self:makeTexture(("Life: #%s#%d/%d   "):format(player:colorLife(), player.life, player.max_life), w * 0.02, h * 0.01)
+    self:makeTexture(("Life: #%s#%d/%d   "):format(player:colorLife(), player.life, player.max_life), w * 0.03, h * 0.01)
 	
-	self:makeTexture(("#AQUAMARINE#Dreaming: #LAST#%d/%d   "):format(player.power, player.max_power), w * 0.02, h * 0.05)
+	self:makeTexture(("#AQUAMARINE#Dreaming: #LAST#%d/%d   "):format(player.power, player.max_power), w * 0.03, h * 0.05)
 
 	-- TODO: Colored Zone Names for this display
 	self:makeTexture(("%s"):format(game.zone.name), w * 0.8, h * 0.01, 240, 240, 120)
