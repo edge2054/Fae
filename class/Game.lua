@@ -34,7 +34,8 @@ local Player = require "mod.class.Player"
 local NPC = require "mod.class.NPC"
 
 local PlayerDisplay = require "mod.class.PlayerDisplay"
-local HotkeysDisplay = require "engine.HotkeysDisplay"
+--local HotkeysDisplay = require "engine.HotkeysDisplay"
+local HotkeysIconsDisplay = require "engine.HotkeysIconsDisplay"
 local ActorsSeenDisplay = require "engine.ActorsSeenDisplay"
 local LogDisplay = require "engine.LogDisplay"
 local LogFlasher = require "engine.LogFlasher"
@@ -58,10 +59,13 @@ function _M:init()
 end
 
 function _M:run()
+	local font = "/data/font/DroidSansMono.ttf"
+	local font_size = 10
 	self.player_display = PlayerDisplay.new(0, 20, self.w, 20)
 	self.flash = LogFlasher.new(0, 0, self.w, 20, nil, nil, nil, {255,255,255}, {0,0,0})
 	self.logdisplay = LogDisplay.new(0, self.h * 0.8, self.w * 0.5, self.h * 0.2, nil, nil, nil, {255,255,255}, {30,30,30})
-	self.hotkeys_display = HotkeysDisplay.new(nil, self.w * 0.5, self.h * 0.8, self.w * 0.5, self.h * 0.2, {30,30,0})
+	self.hotkeys_display_icons = HotkeysIconsDisplay.new(nil, self.w * 0.1, self.h * 0.90, self.w * 0.5, self.h * 0.2, {255,255,255}, font, font_size, game.h * 0.06, game.h * 0.06)
+	self.hotkeys_display_icons:enableShadow(0.6)
 	self.npcs_display = ActorsSeenDisplay.new(nil, self.w * 0.5, self.h * 0.8, self.w * 0.5, self.h * 0.2, {30,30,0})
 	self.tooltip = Tooltip.new(nil, nil, {255,255,255}, {30,30,30})
 	self.flyers = FlyingText.new()
@@ -71,7 +75,7 @@ function _M:run()
 	self.logSeen = function(e, style, ...) if e and self.level.map.seens(e.x, e.y) then self.log(style, ...) end end
 	self.logPlayer = function(e, style, ...) if e == self.player then self.log(style, ...) end end
 
-	self.log(self.flash.GOOD, "Welcome to #00FF00#the template module!")
+	self.log(self.flash.GOOD, "Welcome to #00FF00#Fae!")
 
 	-- Setup inputs
 	self:setupCommands()
@@ -80,7 +84,7 @@ function _M:run()
 	-- Starting from here we create a new game
 	if not self.player then self:newGame() end
 
-	self.hotkeys_display.actor = self.player
+	self.hotkeys_display_icons.actor = self.player
 	self.npcs_display.actor = self.player
 
 	-- Setup the targetting system
@@ -237,12 +241,12 @@ function _M:display(nb_keyframe)
 
 	-- We display the player's interface
 	self.player_display:toScreen(nb_keyframe)
-	self.flash:toScreen(nb_keyframe)
+--	self.flash:toScreen(nb_keyframe)
 --	self.logdisplay:toScreen()
 	if self.show_npc_list then
 		self.npcs_display:toScreen()
 	else
-		self.hotkeys_display:toScreen()
+		self.hotkeys_display_icons:toScreen()
 	end
 	if self.player then self.player.changed = false end
 
@@ -417,8 +421,8 @@ function _M:setupMouse(reset)
 		if button == "wheeldown" then self.logdisplay:scrollUp(-1) end
 	end, {button=true})
 	-- Use hotkeys with mouse
-	self.mouse:registerZone(self.hotkeys_display.display_x, self.hotkeys_display.display_y, self.w, self.h, function(button, mx, my, xrel, yrel, bx, by, event)
-		self.hotkeys_display:onMouse(button, mx, my, event == "button", function(text) self.tooltip:displayAtMap(nil, nil, self.w, self.h, tostring(text)) end)
+	self.mouse:registerZone(self.hotkeys_display_icons.display_x, self.hotkeys_display_icons.display_y, self.w, self.h, function(button, mx, my, xrel, yrel, bx, by, event)
+		self.hotkeys_display_icons:onMouse(button, mx, my, event == "button", function(text) self.tooltip:displayAtMap(nil, nil, self.w, self.h, tostring(text)) end)
 	end)
 	self.mouse:setCurrent()
 end
