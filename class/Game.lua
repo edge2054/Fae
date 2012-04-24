@@ -232,13 +232,13 @@ function _M:display(nb_keyframe)
 		self.target:display()
 
 		-- And the minimap
-		self.level.map:minimapDisplay(self.w - 200, 20, util.bound(self.player.x - 25, 0, self.level.map.w - 50), util.bound(self.player.y - 25, 0, self.level.map.h - 50), 50, 50, 0.6)
+		--self.level.map:minimapDisplay(self.w - 200, 20, util.bound(self.player.x - 25, 0, self.level.map.w - 50), util.bound(self.player.y - 25, 0, self.level.map.h - 50), 50, 50, 0.6)
 	end
 
 	-- We display the player's interface
 	self.player_display:toScreen(nb_keyframe)
 	self.flash:toScreen(nb_keyframe)
-	self.logdisplay:toScreen()
+--	self.logdisplay:toScreen()
 	if self.show_npc_list then
 		self.npcs_display:toScreen()
 	else
@@ -346,6 +346,10 @@ function _M:setupCommands()
 
 		SHOW_CHARACTER_SHEET = function()
 			self:registerDialog(require("mod.dialogs.CharacterSheet").new(self.player))
+		end,
+		
+		SHOW_MESSAGE_LOG = function()
+			self.logdisplay:showLogDialog()
 		end,
 
 		-- Exit the game

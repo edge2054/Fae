@@ -56,5 +56,5 @@ function _M:tooltip()
 	local str = mod.class.Actor.tooltip(self)
 	return str..([[
 
-Target: %s]]):format(self.ai_target.actor and self.ai_target.actor.name or "none")
+#YELLOW#Target#LAST#: %s]]):format(self.ai_target.actor and self.ai_target.actor.name or "none")
 end
