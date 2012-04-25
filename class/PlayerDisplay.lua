@@ -24,16 +24,6 @@ local Mouse = require "engine.Mouse"
 
 module(..., package.seeall, class.make)
 
---[[function _M:init()
-	self.font = core.display.newFont("/data/font/Monaco.TTF", 20)
-	self.font_h = self.font:lineSkip()
-
-	self.mouse = Mouse.new()
-
-	local gw, gh = core.display.size()
-	self:resize(1, gh - 40, gw, 40)
-end]]
-
 function _M:init(x, y, w, h, font, size)
 	self.display_x = x
 	self.display_y = y
