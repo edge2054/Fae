@@ -34,9 +34,7 @@ local Player = require "mod.class.Player"
 local NPC = require "mod.class.NPC"
 
 local PlayerDisplay = require "mod.class.PlayerDisplay"
---local HotkeysDisplay = require "engine.HotkeysDisplay"
 local HotkeysIconsDisplay = require "engine.HotkeysIconsDisplay"
-local ActorsSeenDisplay = require "engine.ActorsSeenDisplay"
 local LogDisplay = require "engine.LogDisplay"
 
 local DebugConsole = require "engine.DebugConsole"
@@ -62,7 +60,6 @@ function _M:run()
 	self.logdisplay = LogDisplay.new(0, self.h * 0.8, self.w * 0.5, self.h * 0.2, nil, nil, nil, {255,255,255}, {30,30,30})
 	self.hotkeys_display_icons = HotkeysIconsDisplay.new(nil, self.w * 0.1, self.h * 0.90, self.w * 0.5, self.h * 0.2, {255,255,255}, "/data/font/DroidSansMono.ttf", 10, game.h * 0.06, game.h * 0.06)
 	self.hotkeys_display_icons:enableShadow(0.6)
-	self.npcs_display = ActorsSeenDisplay.new(nil, self.w * 0.5, self.h * 0.8, self.w * 0.5, self.h * 0.2, {30,30,0})
 	self.tooltip = Tooltip.new(nil, nil, {255,255,255}, {30,30,30})
 	self.flyers = FlyingText.new()
 	self:setFlyingText(self.flyers)
@@ -81,7 +78,6 @@ function _M:run()
 	if not self.player then self:newGame() end
 
 	self.hotkeys_display_icons.actor = self.player
-	self.npcs_display.actor = self.player
 
 	-- Setup the targetting system
 	engine.interface.GameTargeting.init(self)
@@ -237,11 +233,8 @@ function _M:display(nb_keyframe)
 
 	-- We display the player's interface
 	self.player_display:toScreen(nb_keyframe)
-	if self.show_npc_list then
-		self.npcs_display:toScreen()
-	else
-		self.hotkeys_display_icons:toScreen()
-	end
+	self.hotkeys_display_icons:toScreen()
+
 	if self.player then self.player.changed = false end
 
 	-- Tooltip is displayed over all else
