@@ -18,6 +18,8 @@
 -- edge2054@gmail.com
 
 require "engine.class"
+require "engine.interface.GameMusic"
+require "engine.interface.GameSound"
 require "engine.GameTurnBased"
 require "engine.interface.GameTargeting"
 require "engine.KeyBind"
@@ -43,10 +45,12 @@ local Tooltip = require "mod.class.Tooltip"
 
 local QuitDialog = require "mod.dialogs.Quit"
 
-module(..., package.seeall, class.inherit(engine.GameTurnBased, engine.interface.GameTargeting))
+module(..., package.seeall, class.inherit(engine.GameTurnBased, engine.interface.GameMusic, engine.interface.GameSound, engine.interface.GameTargeting))
 
 function _M:init()
 	engine.GameTurnBased.init(self, engine.KeyBind.new(), 1000, 100)
+	engine.interface.GameMusic.init(self)
+	engine.interface.GameSound.init(self)
 
 	-- Pause at birth
 	self.paused = true
@@ -109,6 +113,9 @@ end
 
 function _M:loaded()
 	engine.GameTurnBased.loaded(self)
+	engine.interface.GameMusic.loaded(self)
+	engine.interface.GameSound.loaded(self)
+	self:playMusic()
 	Zone:setup{npc_class="mod.class.NPC", grid_class="mod.class.Grid"}
 	Map:setViewerActor(self.player)
 	local th = 48
@@ -170,6 +177,16 @@ function _M:changeLevel(lev, zone)
 		end
 	end
 	self.zone:getLevel(self, lev, old_lev)
+	
+	-- Add the music
+	local musics = {}
+	if self.zone.ambient_music then
+		if type(self.zone.ambient_music) == "string" then musics[#musics+1] = self.zone.ambient_music
+		elseif type(self.zone.ambient_music) == "table" then for i, name in ipairs(self.zone.ambient_music) do musics[#musics+1] = name end
+		elseif type(self.zone.ambient_music) == "function" then for i, name in ipairs{self.zone.ambient_music()} do musics[#musics+1] = name end
+		end
+	end
+	self:playAndStopMusic(unpack(musics))
 
 	if lev > old_lev then
 		self.player:move(self.level.default_up.x, self.level.default_up.y, true)
@@ -178,6 +195,8 @@ function _M:changeLevel(lev, zone)
 	end
 	self.level:addEntity(self.player)
 end
+
+
 
 function _M:getPlayer()
 	return self.player
