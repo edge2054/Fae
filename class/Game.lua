@@ -113,14 +113,14 @@ end
 
 function _M:loaded()
 	engine.GameTurnBased.loaded(self)
-	engine.interface.GameMusic.loaded(self)
-	engine.interface.GameSound.loaded(self)
-	self:playMusic()
-	Zone:setup{npc_class="mod.class.NPC", grid_class="mod.class.Grid"}
+	Zone:setup{npc_class="mod.class.NPC", grid_class="mod.class.Grid", object_class="mod.class.Object"}
 	Map:setViewerActor(self.player)
 	local th = 48
 	local tw = math.floor(math.sqrt(0.75) * (th + 0.5))
 	Map:setViewPort(0, 0, self.w * 0.8, self.h * 0.8, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
+	engine.interface.GameMusic.loaded(self)
+	engine.interface.GameSound.loaded(self)
+	self:playMusic()
 	self.key = engine.KeyBind.new()
 end
 
@@ -332,6 +332,29 @@ function _M:setupCommands()
 		HOTKEY_PREV_PAGE = function() self.player:prevHotkeyPage() end,
 		HOTKEY_NEXT_PAGE = function() self.player:nextHotkeyPage() end,
 
+		-- Item Management
+		PICKUP_FLOOR = function()
+			if self.player.no_inventory_access then return end
+			self.player:playerPickup()
+		end,
+		DROP_FLOOR = function()
+			if self.player.no_inventory_access then return end
+			self.player:playerDrop()
+		end,
+		SHOW_INVENTORY = function()
+			if self.player.no_inventory_access then return end
+			local d
+			d = self.player:showEquipInven("Inventory", nil, function(o, inven, item, button, event)
+				if not o then return end
+				local ud = require("mod.dialogs.UseItemDialog").new(event == "button", self.player, o, item, inven, function(_, _, _, stop)
+					d:generate()
+					d:generateList()
+					if stop then self:unregisterDialog(d) end
+				end)
+				self:registerDialog(ud)
+			end)
+		end,
+		
 		-- Actions
 		CHANGE_LEVEL = function()
 			local e = self.level.map(self.player.x, self.player.y, Map.TERRAIN)

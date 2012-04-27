@@ -20,6 +20,7 @@
 require "engine.class"
 require "engine.Actor"
 require "engine.Autolevel"
+require "engine.interface.ActorInventory"
 require "engine.interface.ActorTemporaryEffects"
 require "engine.interface.ActorLife"
 require "engine.interface.ActorProject"
@@ -33,6 +34,7 @@ local Map = require "engine.Map"
 
 module(..., package.seeall, class.inherit(
 	engine.Actor,
+	engine.interface.ActorInventory,
 	engine.interface.ActorTemporaryEffects,
 	engine.interface.ActorLife,
 	engine.interface.ActorProject,
@@ -56,6 +58,7 @@ function _M:init(t, no_default)
 	self.combat = { dam=1 }
 
 	engine.Actor.init(self, t, no_default)
+	engine.interface.ActorInventory.init(self, t)
 	engine.interface.ActorTemporaryEffects.init(self, t)
 	engine.interface.ActorLife.init(self, t)
 	engine.interface.ActorProject.init(self, t)

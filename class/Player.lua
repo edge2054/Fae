@@ -19,7 +19,7 @@
 
 require "engine.class"
 require "mod.class.Actor"
--- require "mod.class.Object"
+require "mod.class.Object"
 require "engine.interface.PlayerRest"
 require "engine.interface.PlayerRun"
 require "engine.interface.PlayerSlide"
@@ -132,9 +132,94 @@ function _M:die(src)
 	end
 end
 
-function _M:setName(name)
-	self.name = name
-	game.save_name = name
+-- Item management
+function _M:playerPickup()
+    -- If 2 or more objects, display a pickup dialog, otherwise just picks up
+    if game.level.map:getObject(self.x, self.y, 2) then
+        local d d = self:showPickupFloor("Pickup", nil, function(o, item)
+            self:pickupFloor(item, true)
+            self.changed = true
+            d:used()
+        end)
+    else
+        self:pickupFloor(1, true)
+        self:sortInven()
+        self:useEnergy()
+		self.changed = true
+    end
+end
+
+function _M:playerDrop()
+    local inven = self:getInven(self.INVEN_INVEN)
+    local d d = self:showInventory("Drop object", inven, nil, function(o, item)
+        self:dropFloor(inven, item, true, true)
+        self:sortInven(inven)
+        self:useEnergy()
+        self.changed = true
+        return true
+    end)
+end
+
+function _M:doWear(inven, item, o)
+    self:removeObject(inven, item, true)
+    local ro = self:wearObject(o, true, true)
+    if ro then
+        if type(ro) == "table" then self:addObject(inven, ro) end
+    elseif not ro then
+        self:addObject(inven, o)
+    end
+    self:sortInven()
+    self:useEnergy()
+    self.changed = true
+end
+
+function _M:doTakeoff(inven, item, o)
+    if self:takeoffObject(inven, item) then
+        self:addObject(self.INVEN_INVEN, o)
+    end
+    self:sortInven()
+    self:useEnergy()
+    self.changed = true
+end
+
+function _M:playerUseItem(object, item, inven)
+    local use_fct = function(o, inven, item)
+        if not o then return end
+        local co = coroutine.create(function()
+            self.changed = true
+
+            local used, ret = o:use(self, nil, inven, item)
+            if not used then return end
+            if ret and ret == "destroy" then
+                if o.multicharge and o.multicharge > 1 then
+                    o.multicharge = o.multicharge - 1
+                else
+                    local _, del = self:removeObject(self:getInven(inven), item)
+                    if del then
+                        game.log("You have no more %s.", o:getName{no_count=true, do_color=true})
+                    else
+                        game.log("You have %s.", o:getName{do_color=true})
+                    end
+                    self:sortInven(self:getInven(inven))
+                end
+                return true
+            end
+
+            self.changed = true
+        end)
+        local ok, ret = coroutine.resume(co)
+        if not ok and ret then print(debug.traceback(co)) error(ret) end
+        return true
+    end
+
+    if object and item then return use_fct(object, inven, item) end
+
+    self:showEquipInven("Use object",
+        function(o)
+            return o:canUseObject()
+        end,
+        use_fct
+    )
 end
 
 --- Notify the player of available cooldowns
@@ -233,5 +318,11 @@ function _M:runStopped()
 	-- if you stop at an object (such as on a trap), then mark it as seen
 	local obj = game.level.map:getObject(x, y, 1)
 	if obj then game.level.map.attrs(x, y, "obj_seen", true) end]]
+end
+
+-- Sets the save file name?
+function _M:setName(name)
+	self.name = name
+	game.save_name = name
 end
 

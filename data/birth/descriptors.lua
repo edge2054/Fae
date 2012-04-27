@@ -30,6 +30,7 @@ newBirthDescriptor{
 		life_regen = 1,
 		desc = "I find myself lost.  A stranger in a strange land.  My only hope is to press forward and find a way home.",
 	},
+	body = { INVEN = 10, MAINHAND = 1, OFFHAND = 1, BODY = 1, LAUNCHER = 1, QUIVER = 1},
 }
 
 newBirthDescriptor{

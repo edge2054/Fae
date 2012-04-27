@@ -20,6 +20,7 @@
 -- This file loads the game module, and loads data
 local KeyBind = require "engine.KeyBind"
 local DamageType = require "engine.DamageType"
+local ActorInventory = require "engine.interface.ActorInventory"
 local ActorStats = require "engine.interface.ActorStats"
 local ActorResource = require "engine.interface.ActorResource"
 local ActorTalents = require "engine.interface.ActorTalents"
@@ -49,6 +50,13 @@ ActorStats:defineStat("Strength",	"str", 10, 1, 100, "Strength defines your char
 ActorStats:defineStat("Dexterity",	"dex", 10, 1, 100, "Dexterity defines your character's ability to be agile and alert. It increases your chance to hit, your ability to avoid attacks and your damage with light weapons.")
 ActorStats:defineStat("Constitution",	"con", 10, 1, 100, "Constitution defines your character's ability to withstand and resist damage. It increases your maximum life and physical resistance.")
 
+-- Actor inventory
+ActorInventory:defineInventory("MAINHAND", "Wielded in main hand", true, "I wield most weapons with this hand.")
+ActorInventory:defineInventory("OFFHAND", "Held or wielded in off hand", true, "I can hold a light or use a shield in my off-hand.  Some weapons require both hands for me to use.")
+ActorInventory:defineInventory("BODY", "Main armor", true, "Armor protects me from physical attacks. Heavier armor may slow me down.")
+ActorInventory:defineInventory("LAUNCHER", "Launcher", true, "My ranged weapon.")
+ActorInventory:defineInventory("QUIVER", "Quiver", true, "My readied ammo.")
+
 -- Actor AIs
 ActorAI:loadDefinition("/engine/ai/")
 
@@ -68,7 +76,7 @@ config.settings.player_slide = true
 Map.updateMapDisplay = function (self, x, y, mos)
 	local g = self(x, y, self.TERRAIN)
 	local gb = nil
-	--local o = self(x, y, self.OBJECT)
+	local o = self(x, y, self.OBJECT)
 	local a = self(x, y, self.ACTOR)
 	--local t = self(x, y, self.TRAP)
 	local p = self(x, y, self.PROJECTILE)
@@ -83,7 +91,7 @@ Map.updateMapDisplay = function (self, x, y, mos)
 		g:setupMinimapInfo(g._mo, self)
 		if g.default_tile then gb = g.default_tile end
 	end
---[[if t then
+	if t then
       -- Handles trap being known
 		if not self.actor_player or t:knownBy(self.actor_player) then
 			t:getMapObjects(self.tiles, mos, 3)
@@ -99,7 +107,7 @@ Map.updateMapDisplay = function (self, x, y, mos)
 			local mo = o:getMapStackMO(self, x, y)
 			if mo then mos[5] = mo end
 		end
-   end--]]
+	end
 	if a then
 		-- Handles invisibility and telepathy and other such things
 		if not self.actor_player or self.actor_player:canSee(a) then
@@ -112,8 +120,8 @@ Map.updateMapDisplay = function (self, x, y, mos)
 		p:setupMinimapInfo(p._mo, self)
 	end
 
-   --if gb and not p and (not a or (self.actor_player and not self.actor_player.fov.actors[a])) then
-	if gb and not p and (not a or not self.actor_player:canSee(a)) then
+	--if gb and not p and (not a or (self.actor_player and not self.actor_player.fov.actors[a])) then
+	if gb and not p and not t and not o and (not a or not self.actor_player:canSee(a)) then
 		gb:getMapObjects(self.tiles, mos, 3)
 	end
 end
