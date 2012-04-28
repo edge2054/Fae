@@ -383,3 +383,23 @@ function _M:setName(name)
 	game.save_name = name
 end
 
+--- Funky shader stuff
+function _M:updateMainShader()
+	if game.fbo_shader then
+		-- Set shader HP warning
+		if self.life ~= self.old_life then
+			if self.life < 20 then game.fbo_shader:setUniform("hp_warning", 1 - (self.life / self.max_life))
+			else game.fbo_shader:setUniform("hp_warning", 0) end
+		end
+
+		-- Intensify shader
+		if self.raging then game.fbo_shader:setUniform("intensify", {1,0,0,1})
+		else game.fbo_shader:setUniform("intensify", {0,0,0,0}) -- Disable
+		end
+		
+		-- Blur shader
+		if self.raging then game.fbo_shader:setUniform("blur", 1)
+		else game.fbo_shader:setUniform("blur", 0) -- Disable
+		end
+	end
+end
