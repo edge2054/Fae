@@ -298,3 +298,65 @@ function _M:canBe(what)
 	if what == "instakill" and rng.percent(100 * (self:attr("instakill_immune") or 0)) then return false end
 	return true
 end
+
+-- COPY/PASTED FROM ENGINE, CHANGED HEX X AND WIDTH FOR TACTICAL BORDERS -- tiger_eye
+--- Attach or remove a display callback
+-- Defines particles to display
+function _M:defineDisplayCallback()
+	if not self._mo then return end
+
+	local ps = self:getParticlesList()
+
+	local f_self = nil
+	local f_danger = nil
+	local f_friend = nil
+	local f_enemy = nil
+	local f_neutral = nil
+
+	self._mo:displayCallback(function(x, y, w, h)
+		local e
+		for i = 1, #ps do
+			e = ps[i]
+			e:checkDisplay()
+			if e.ps:isAlive() then e.ps:toScreen(x + w / 2, y + h / 2, true, w / game.level.map.tile_w)
+			else self:removeParticles(e)
+			end
+		end
+
+		-- Tactical info
+		if game.level and game.level.map.view_faction then
+			local map = game.level.map
+
+			if not f_self then
+				f_self = game.level.map.tilesTactic:get(nil, 0,0,0, 0,0,0, map.faction_self)
+				f_danger = game.level.map.tilesTactic:get(nil, 0,0,0, 0,0,0, map.faction_danger)
+				f_friend = game.level.map.tilesTactic:get(nil, 0,0,0, 0,0,0, map.faction_friend)
+				f_enemy = game.level.map.tilesTactic:get(nil, 0,0,0, 0,0,0, map.faction_enemy)
+				f_neutral = game.level.map.tilesTactic:get(nil, 0,0,0, 0,0,0, map.faction_neutral)
+			end
+
+			if self.faction then
+				local friend
+				if not map.actor_player then friend = Faction:factionReaction(map.view_faction, self.faction)
+				else friend = map.actor_player:reactionToward(self) end
+
+				-- CHANGED HERE -- tiger_eye
+				hex_factor = 1 / (2*math.sqrt(0.75)-1)
+				hex_width = hex_factor*w
+				hex_x = x-0.5*(hex_width-w)
+				if self == map.actor_player then
+					f_self:toScreen(hex_x, y, hex_width, h)
+				elseif map:faction_danger_check(self) then
+					f_danger:toScreen(hex_x, y, hex_width, h)
+				elseif friend > 0 then
+					f_friend:toScreen(hex_x, y, hex_width, h)
+				elseif friend < 0 then
+					f_enemy:toScreen(hex_x, y, hex_width, h)
+				else
+					f_neutral:toScreen(hex_x, y, hex_width, h)
+				end
+			end
+		end
+		return true
+	end)
+end
