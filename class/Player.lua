@@ -20,6 +20,7 @@
 require "engine.class"
 require "mod.class.Actor"
 require "mod.class.Object"
+require "mod.class.interface.PlayerExplore"
 require "engine.interface.PlayerRest"
 require "engine.interface.PlayerRun"
 require "engine.interface.PlayerSlide"
@@ -38,6 +39,7 @@ local Particles = require "engine.Particles"
 -- It is also able to run and rest and use hotkeys
 module(..., package.seeall, class.inherit(
 	mod.class.Actor,
+	mod.class.interface.PlayerExplore,
 	engine.interface.PlayerRest,
 	engine.interface.PlayerRun,
 	engine.interface.PlayerSlide,
@@ -249,12 +251,17 @@ function _M:setTarget(target)
 	return game:targetSetForPlayer(target)
 end
 
+
 local function spotHostiles(self)
-	local seen = false
+	local seen = {}
+	if not self.x then return seen end
+
 	-- Check for visible monsters, only see LOS actors, so telepathy wont prevent resting
-	core.fov.calc_circle(self.x, self.y, game.level.map.w, game.level.map.h, 20, function(_, x, y) return game.level.map:opaque(x, y) end, function(_, x, y)
+	core.fov.calc_circle(self.x, self.y, game.level.map.w, game.level.map.h, self.sight or 10, function(_, x, y) return game.level.map:opaque(x, y) end, function(_, x, y)
 		local actor = game.level.map(x, y, game.level.map.ACTOR)
-		if actor and self:reactionToward(actor) < 0 and self:canSee(actor) and game.level.map.seens(x, y) then seen = true end
+		if actor and self:reactionToward(actor) < 0 and self:canSee(actor) and game.level.map.seens(x, y) then
+			seen[#seen + 1] = {x=x,y=y,actor=actor}
+		end
 	end, nil)
 	return seen
 end
@@ -262,7 +269,8 @@ end
 --- Can we continue resting ?
 -- We can rest if no hostiles are in sight, and if we need life/mana/stamina (and their regen rates allows them to fully regen)
 function _M:restCheck()
-	if spotHostiles(self) then return false, "hostile spotted" end
+	local spotted = spotHostiles(self)
+	if #spotted > 0 then return false, "hostile spotted" end
 
 	-- Check resources, make sure they CAN go up, otherwise we will never stop
 	if self:getPower() < self:getMaxPower() and self.power_regen > 0 then return true end
@@ -273,15 +281,42 @@ end
 
 --- Can we continue running?
 -- We can run if no hostiles are in sight, and if we no interesting terrains are next to us
-function _M:runCheck()
-	if spotHostiles(self) then return false, "hostile spotted" end
+function _M:runCheck(ignore_memory)
+	local spotted = spotHostiles(self)
+	if #spotted > 0 then return false, "hostile spotted" end
 
 	-- Notice any noticeable terrain
 	local noticed = false
-	self:runScan(function(x, y)
+	self:runScan(function(x, y, what)
+		-- Objects are always interesting, only on curent spot
+		if what == "self" and not game.level.map.attrs(x, y, "obj_seen") then
+			local obj = game.level.map:getObject(x, y, 1)
+			if obj then
+				noticed = "object seen"
+				if not ignore_memory then game.level.map.attrs(x, y, "obj_seen", true) end
+				return
+			end
+		end
 		-- Only notice interesting terrains
 		local grid = game.level.map(x, y, Map.TERRAIN)
-		if grid and grid.notice then noticed = "interesting terrain" end
+		if grid and grid.notice and not (self.running and self.running.path and (game.level.map.attrs(x, y, "noticed")
+				or (what ~= self and (self.running.explore and grid.door_opened                     -- safe door
+				or #self.running.path == self.running.cnt and (self.running.explore == "exit"       -- auto-explore onto exit
+				or not self.running.explore and grid.change_level))                                 -- A* onto exit
+				or #self.running.path - self.running.cnt < 2 and (self.running.explore == "portal"  -- auto-explore onto portal
+				or not self.running.explore and grid.orb_portal)                                    -- A* onto portal
+				or self.running.cnt < 3 and grid.orb_portal and                                     -- path from portal
+				game.level.map:checkEntity(self.running.path[1].x, self.running.path[1].y, Map.TERRAIN, "orb_portal"))))
+		then
+			if self.running and self.running.explore and self.running.path and self.running.explore ~= "unseen" and self.running.cnt == #self.running.path + 1 then
+				noticed = "at " .. self.running.explore
+			else
+				noticed = "interesting terrain"
+			end
+			-- let's only remember and ignore standard interesting terrain
+			if not ignore_memory and (grid.change_level or grid.orb_portal) then game.level.map.attrs(x, y, "noticed", true) end
+			return
+		end
 	end)
 	if noticed then return false, noticed end
 
@@ -294,6 +329,28 @@ end
 -- We just feed our spotHostile to the interface mouseMove
 function _M:mouseMove(tmx, tmy)
 	return engine.interface.PlayerMouse.mouseMove(self, tmx, tmy, spotHostiles)
+end
+
+--- Move with the mouse
+-- We just feed our spotHostile to the interface mouseMove
+function _M:mouseMove(tmx, tmy, force_move)
+	local astar_check = function(x, y)
+		-- Dont do traps
+		local trap = game.level.map(x, y, Map.TRAP)
+		if trap and trap:knownBy(self) and trap:canTrigger(x, y, self, true) then return false end
+
+		-- Dont go where you cant breath
+		if not self:attr("no_breath") then
+			local air_level, air_condition = game.level.map:checkEntity(x, y, Map.TERRAIN, "air_level"), game.level.map:checkEntity(x, y, Map.TERRAIN, "air_condition")
+			if air_level then
+				if not air_condition or not self.can_breath[air_condition] or self.can_breath[air_condition] <= 0 then
+					return false
+				end
+			end
+		end
+		return true
+	end
+	return engine.interface.PlayerMouse.mouseMove(self, tmx, tmy, function() local spotted = spotHostiles(self) ; return #spotted > 0 end, {recheck=true, astar_check=astar_check}, force_move)
 end
 
 --- Called after running a step
@@ -309,15 +366,15 @@ function _M:runStopped()
 	game.level.map.clean_fov = true
 	self:playerFOV()
 	local spotted = spotHostiles(self)
-	--[[if #spotted > 0 then
+	if #spotted > 0 then
 		for _, node in ipairs(spotted) do
-			node.actor:addParticles(engine.Particles.new("notice_enemy", 1))
+		--	node.actor:addParticles(engine.Particles.new("notice_enemy", 1))
 		end
 	end
 
 	-- if you stop at an object (such as on a trap), then mark it as seen
 	local obj = game.level.map:getObject(x, y, 1)
-	if obj then game.level.map.attrs(x, y, "obj_seen", true) end]]
+	if obj then game.level.map.attrs(x, y, "obj_seen", true) end
 end
 
 -- Sets the save file name?

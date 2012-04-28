@@ -282,6 +282,40 @@ function _M:setupCommands()
 		MOVE_RIGHT_UP = function() self.player:moveDir(9) end,
 		MOVE_RIGHT_DOWN = function() self.player:moveDir(3) end,
 		MOVE_STAY = function() self.player:useEnergy() end,
+		
+		RUN = function()
+			self.log("Run in which direction?")
+			local co = coroutine.create(function()
+				local x, y = self.player:getTarget{type="hit", no_restrict=true, range=1, immediate_keys=true, default_target=self.player}
+				if x and y then self.player:runInit(util.getDir(x, y, self.player.x, self.player.y)) end
+			end)
+			local ok, err = coroutine.resume(co)
+			if not ok and err then print(debug.traceback(co)) error(err) end
+		end,
+
+		RUN_AUTO = function()
+			if self.level and self.zone then
+				local seen = {}
+				-- Check for visible monsters.  Only see LOS actors, so telepathy wont prevent it
+				core.fov.calc_circle(self.player.x, self.player.y, self.level.map.w, self.level.map.h, self.player.sight or 10,
+					function(_, x, y) return self.level.map:opaque(x, y) end,
+					function(_, x, y)
+						local actor = self.level.map(x, y, self.level.map.ACTOR)
+						if actor and actor ~= self.player and self.player:reactionToward(actor) < 0 and
+							self.player:canSee(actor) and self.level.map.seens(x, y) then seen[#seen + 1] = {x=x, y=y, actor=actor} end
+					end, nil)
+				if self.zone.no_autoexplore or self.level.no_autoexplore then
+					self.log("You may not auto-explore this level.")
+				elseif #seen > 0 then
+					self.log("You may not auto-explore with enemies in sight!")
+					for _, node in ipairs(seen) do
+					--	node.actor:addParticles(engine.Particles.new("notice_enemy", 1))
+					end
+				elseif not self.player:autoExplore() then
+					self.log("There is nowhere left to explore.")
+				end
+			end
+		end,
 
 		RUN_LEFT = function() self.player:runInit(4) end,
 		RUN_RIGHT = function() self.player:runInit(6) end,
