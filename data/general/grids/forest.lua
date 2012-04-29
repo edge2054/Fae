@@ -29,7 +29,7 @@ newEntity{
 	define_as = "GRASS",
 	type = "floor", subtype = "forest",
 	name = "grass",
-	default_tile=class.new{_noalpha=false, display = '.', color_r=185, color_g=205, color_b=185}, display='', back_color={r=140, g=200, b=140}, image="terrain/grass1.png",
+	default_tile=class.new{_noalpha=false, display = '', color_r=185, color_g=205, color_b=185}, display='', back_color={r=140, g=200, b=140}, image="terrain/grass_gradient1.png",
 	always_remember = true,
 	base = "HEX_BASE",
 }
