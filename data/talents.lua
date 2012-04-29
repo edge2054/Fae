@@ -39,7 +39,7 @@ newTalent{
 	type = {"role/combat", 1},
 	points = 1,
 	cooldown = 6,
-	power = 2,
+	reason = 2,
 	range = 1,
 	action = function(self, t)
 		local tg = {type="hit", range=self:getTalentRange(t)}
@@ -60,7 +60,7 @@ newTalent{
 	type = {"role/combat", 1},
 	points = 1,
 	cooldown = 6,
-	power = 2,
+	reason = 2,
 	range = 6,
 	action = function(self, t)
 		local tg = {type="ball", range=self:getTalentRange(t), radius=1, talent=t}
@@ -73,4 +73,6 @@ newTalent{
 		return "Zshhhhhhhhh!"
 	end,
 }
+
+load("/data/talents/belief/base.lua")
 
