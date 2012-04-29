@@ -47,16 +47,16 @@ ActorResource:defineResource("Belief", "belief", nil, "belief_regen", "Belief re
 ActorResource:defineResource("Reason", "reason", nil, "reason_regen", "Reason represents my logic and higher thinking.")
 
 -- Actor stats
-ActorStats:defineStat("Strength",	"str", 10, 1, 100, "Strength defines your character's ability to apply physical force. It increases your melee damage, damage with heavy weapons, your chance to resist physical effects, and carrying capacity.")
-ActorStats:defineStat("Dexterity",	"dex", 10, 1, 100, "Dexterity defines your character's ability to be agile and alert. It increases your chance to hit, your ability to avoid attacks and your damage with light weapons.")
-ActorStats:defineStat("Constitution",	"con", 10, 1, 100, "Constitution defines your character's ability to withstand and resist damage. It increases your maximum life and physical resistance.")
+ActorStats:defineStat("Offense", "offense", 1, 1, 50,	"Strength defines your character's ability to apply physical force. It increases your melee damage, damage with heavy weapons, your chance to resist physical effects, and carrying capacity.")
+ActorStats:defineStat("Defense", "defense", 1, 1, 50,	"Dexterity defines your character's ability to be agile and alert. It increases your chance to hit, your ability to avoid attacks and your damage with light weapons.")
+ActorStats:defineStat("Armor", "armor", 1, 1, 50,		"Constitution defines your character's ability to withstand and resist damage. It increases your maximum life and physical resistance.")
 
 -- Actor inventory
 ActorInventory:defineInventory("MAINHAND", "Wielded in main hand", true, "I wield most weapons with this hand.")
 ActorInventory:defineInventory("OFFHAND", "Held or wielded in off hand", true, "I can hold a light or use a shield in my off-hand.  Some weapons require both hands for me to use.")
 ActorInventory:defineInventory("BODY", "Main armor", true, "Armor protects me from physical attacks. Heavier armor may slow me down.")
-ActorInventory:defineInventory("LAUNCHER", "Launcher", true, "My ranged weapon.")
-ActorInventory:defineInventory("QUIVER", "Quiver", true, "My readied ammo.")
+ActorInventory:defineInventory("SHOOTER", "Shooter", true, "My ranged weapon.")
+ActorInventory:defineInventory("AMMO", "Ammo", true, "My readied ammo.")
 
 -- Actor AIs
 ActorAI:loadDefinition("/engine/ai/")

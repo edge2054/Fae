@@ -30,7 +30,7 @@ module(..., package.seeall, class.inherit(Dialog))
 function _M:init(actor)
     self.actor = actor
     
-    self.font = core.display.newFont("/data/font/VeraMono.ttf", 12)
+    self.font = core.display.newFont("/data/font/DroidSansMono.ttf", 14)
     Dialog.init(self, "Character Sheet: "..self.actor.name, math.max(game.w * 0.7, 950), 500, nil, nil, font)
     
     self.c_desc = SurfaceZone.new{width=self.iw, height=self.ih,alpha=0}
@@ -57,8 +57,11 @@ function _M:drawDialog()
 
     h = 0
     w = 0
-    s:drawStringBlended(self.font, "Name : "..(player.name or "Unnamed"), w, h, 255, 255, 255, true) h = h + self.font_h
- --   s:drawStringBlended(self.font, "Role : "..(player.descriptor.role or player.type:capitalize()), w, h, 255, 255, 255, true) h = h + self.font_h
+    s:drawStringBlended(self.font, "Name   : "..(player.name or "Unnamed"), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, "Life   : "..(player.life), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, "Belief : "..(player.belief), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, "Reason : "..(player.reason), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+
         
     h = h + self.font_h -- Adds an empty row
     
@@ -66,9 +69,9 @@ function _M:drawDialog()
     w = self.w * 0.25 
     -- start on second column
         
-    s:drawStringBlended(self.font, "STR : "..(player:getStr()), w, h, 0, 255, 255, true) h = h + self.font_h
-    s:drawStringBlended(self.font, "DEX : "..(player:getDex()), w, h, 255, 0, 255, true) h = h + self.font_h
-    s:drawStringBlended(self.font, "CON : "..(player:getCon()), w, h, 255, 255, 0, true) h = h + self.font_h
+    s:drawStringBlended(self.font, "Offense : "..(player:getOffense()).."d6", w, h, 255, 255, 255, true) h = h + self.font_h + 4
+    s:drawStringBlended(self.font, "Defense : "..(player:getDefense()).."d6", w, h, 255, 255, 255, true) h = h + self.font_h + 4
+    s:drawStringBlended(self.font, "Armor   : "..(player:getArmor()).."d6", w, h, 255, 255, 255, true) h = h + self.font_h + 4
     
     self.c_desc:generate()
     self.changed = false

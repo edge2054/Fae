@@ -17,7 +17,9 @@
 -- Eric Wykoff "edge2054"
 -- edge2054@gmail.com
 
-newEntity{
+
+-- These are place holders and need to be re-written
+--[=[newEntity{
     define_as = "BASE_BATTLEAXE",
     slot = "MAINHAND",
     slot_forbid = "OFFHAND",
@@ -82,4 +84,4 @@ newEntity{
 	combat = {
 		dam = 10,
 	},
-}
+}]=]

@@ -21,7 +21,13 @@
 setDefaultProjector(function(src, x, y, type, dam)
 	local target = game.level.map(x, y, Map.ACTOR)
 	if target then
-		game.logSeen(target, "%s hits %s for %s%0.2f %s damage#LAST#.", src.name:capitalize(), target.name, DamageType:get(type).text_color or "#aaaaaa#", dam, DamageType:get(type).name)
+		if src == game.player then
+			game.logSeen(target, "I hit %s for %s%0.2f %s damage#LAST#.", target.name, DamageType:get(type).text_color or "#aaaaaa#", dam, DamageType:get(type).name)
+		elseif target == game.player then
+			game.logSeen(target, "%s hit me for %s%0.2f %s damage#LAST#.", src.name:capitalize(), DamageType:get(type).text_color or "#aaaaaa#", dam, DamageType:get(type).name)
+		else
+			game.logSeen(target, "%s hits %s for %s%0.2f %s damage#LAST#.", src.name:capitalize(), target.name, DamageType:get(type).text_color or "#aaaaaa#", dam, DamageType:get(type).name)
+		end
 		local sx, sy = game.level.map:getTileToScreen(x, y)
 		if target:takeHit(dam, src) then
 			if src == game.player or target == game.player then

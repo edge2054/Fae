@@ -31,15 +31,11 @@ newBirthDescriptor{
 		belief = 2,
 		reason = 3,
 	},
-	body = { INVEN = 10, MAINHAND = 1, OFFHAND = 1, BODY = 1, LAUNCHER = 1, QUIVER = 1},
-}
-
---[[newBirthDescriptor{
-	type = "role",
-	name = "Rogue",
-	desc =
-	{
-		"I find myself lost.  A stranger in a strange land.  My only hope is to press forward and find a way home.",
+	talents = {
+		-- For easy testing; remove later
+		[ActorTalents.T_KICK] = 1,
+		[ActorTalents.T_ACID_SPRAY] = 1,
 	},
+	
+	body = { INVEN = 10, MAINHAND = 1, OFFHAND = 1, BODY = 1, SHOOTER = 1, AMMO = 1},
 }
-]]

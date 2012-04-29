@@ -51,7 +51,7 @@ function _M:init(t, no_default)
 	self.combat_armor = 0
 
 	-- Default regen
-	t.life_regen = t.life_regen or 0.2 -- Life regen real slow
+	t.life_regen = t.life_regen or 0.1 -- Life regen real slow
 	
 	-- Resources
 	t.max_reason = t.max_reason or 5
@@ -122,7 +122,10 @@ end
 
 -- TODO: VERBOSE when holding down control?
 function _M:tooltip()
-	return ([[#%s#%s#LAST#]]):format(self:colorLife(), self.name)
+	return ([[#%s#%s#LAST#
+Offense %s
+Defense %s
+Armor   %s]]):format(self:colorLife(), self.name, self:getOffense(), self:getDefense(), self:getArmor())
 --	self:getDisplayString(),
 --	self.level,
 --	self.life, self.life * 100 / self.max_life,

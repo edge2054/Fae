@@ -46,14 +46,44 @@ end
 
 --- Makes the death happen!
 function _M:attackTarget(target, mult)
-	if self.combat then
-		local dam = self.combat.dam + self:getStr() - target.combat_armor
-		DamageType:get(DamageType.PHYSICAL).projector(self, target.x, target.y, DamageType.PHYSICAL, math.max(0, dam))
+	-- For our flyers
+	local sx, sy = game.level.map:getTileToScreen(target.x, target.y)
+	-- Check hit
+	local successes = self:checkHit(self, target)
+	if successes >= 0 then
+		local dam = self:getDamage(self, target, successes)
+		if dam > 0 then
+			DamageType:get(DamageType.PHYSICAL).projector(self, target.x, target.y, DamageType.PHYSICAL, math.max(0, dam))
+		elseif self == game.player then
+			game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, "Soaked...", {255,0,255})
+		elseif target == game.player then
+			game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, "Soaked!", {0, 255, 0})
+		end
+	elseif self == game.player then
+		game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, "Missed...", {255,0,255})
+	elseif target == game.player then
+		game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, "Dodged!", {0, 255, 0})
 	end
-
+		
 	-- We use up our own energy
 	self:useEnergy(game.energy_to_act)
 end
+
+function _M:checkHit(self, target)
+	local attack_roll = self:getSuccesses(self:getOffense())
+	local defense_roll = target:getSuccesses(target:getDefense())
+	local successes = attack_roll - defense_roll
+	return successes
+end
+
+function _M:getDamage(self, target, hit_bonus)
+	local damage_dice = self:getOffense() + hit_bonus
+	local damage_roll = self:getSuccesses(damage_dice) 
+	local armor_dice = target:getArmor()
+	local armor_roll = target:getSuccesses(armor_dice)
+	local damage = math.max(0, damage_roll - armor_roll)
+	return damage
+end				
 
 function _M:getSuccesses(dice, sides, target_number)
 	local successes = 0
