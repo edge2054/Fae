@@ -134,7 +134,7 @@ function _M:setupDisplayMode()
 	local tw = math.floor(math.sqrt(0.75) * (th + 0.5))
 	Map:setViewPort(0, 0, self.w, self.h * 0.9, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
 	Map:resetTiles()
-	Map.tiles.use_images = false
+	Map.tiles.use_images = true
 
 	if self.level then
 		self.level.map:recreate()

@@ -18,41 +18,54 @@
 -- edge2054@gmail.com
 
 newEntity{
+	define_as = "HEX_BASE",
+	display_scale=1/3,
+	display_w=8,
+	display_h=3,
+	display_x=-1,
+}
+
+newEntity{
 	define_as = "GRASS",
 	type = "floor", subtype = "forest",
 	name = "grass",
-	default_tile=class.new{_noalpha=false, display = '.', color_r=185, color_g=205, color_b=185}, display='', back_color={r=140, g=200, b=140},
+	default_tile=class.new{_noalpha=false, display = '.', color_r=185, color_g=205, color_b=185}, display='', back_color={r=140, g=200, b=140}, image="terrain/grass1.png",
 	always_remember = true,
+	base = "HEX_BASE",
 }
 
 newEntity{
 	define_as = "TREE",
 	type = "wall", subtype = "forest",
 	name = "tree",
-	default_tile=class.new{_noalpha=false, display = '#', color_r=105, color_g=205, color_b=105}, display='', back_color={r=60, g=150, b=60},
+	default_tile=class.new{_noalpha=false, display = '#', color_r=105, color_g=205, color_b=105}, display='', back_color={r=60, g=150, b=60}, image="terrain/tree1.png",
 	always_remember = true,
 	does_block_move = true,
 	can_pass = {pass_tree=1},
 	block_sight = true,
 	dig = "GRASS",
+	base = "HEX_BASE",
 }
 
 newEntity{
 	define_as = "DOWN_FOREST",
 	subtype = "forest",
 	name = "a path deeper into the forest",
-	default_tile=class.new{_noalpha=false, display = '>', color_r=130, color_g=255, color_b=30}, display='', back_color={r=100, g=180, b=100},
+	default_tile=class.new{_noalpha=false, display = '>', color_r=130, color_g=255, color_b=30}, display='', back_color={r=100, g=180, b=100}, image="terrain/grass2.png",
 	notice = true,
 	always_remember = true,
 	change_level = 1,
+	base = "HEX_BASE",
 }
 
 newEntity{
 	define_as = "UP_FOREST",
 	subtype = "forest",
 	name = "back the way I came",
-	default_tile=class.new{_noalpha=false, display = '<', color_r=130, color_g=255, color_b=30}, display='', back_color={r=100, g=180, b=100},
+	default_tile=class.new{_noalpha=false, display = '<', color_r=130, color_g=255, color_b=30}, display='', back_color={r=100, g=180, b=100}, image="terrain/grass2.png",
 	notice = true,
 	always_remember = true,
 	change_level = -1,
+	base = "HEX_BASE",
 }
+
