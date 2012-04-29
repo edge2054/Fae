@@ -54,3 +54,17 @@ function _M:attackTarget(target, mult)
 	-- We use up our own energy
 	self:useEnergy(game.energy_to_act)
 end
+
+function _M:getSuccesses(dice, sides, target_number)
+	local successes = 0
+	local dice = dice or 1
+	local sides = sides or 6
+	local target_number = target_number or sides/2 + 1
+	for i = 1, dice do
+		if rng.dice(1, sides) >= target_number then
+			successes = successes + 1
+		end
+	end
+	print(("[ROLLING] %sd%s against target number %s, successes %s"):format(dice, sides, target_number, successes))
+	return successes
+end
