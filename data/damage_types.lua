@@ -17,9 +17,11 @@
 -- Eric Wykoff "edge2054"
 -- edge2054@gmail.com
 
--- The basic stuff used to damage a grid
-setDefaultProjector(function(src, x, y, type, dam)
+-- We do our damage flyers and log here to keep setDefaultProjector clean(ish)
+local function doDamageFlyers(src, x, y, type, dam, crit)
 	local target = game.level.map(x, y, Map.ACTOR)
+	local sx, sy = game.level.map:getTileToScreen(target.x, target.y)
+	
 	if target then
 		if src == game.player then
 			game.logSeen(target, "I hit %s for %s%0.2f %s damage#LAST#.", target.name, DamageType:get(type).text_color or "#aaaaaa#", dam, DamageType:get(type).name)
@@ -28,10 +30,16 @@ setDefaultProjector(function(src, x, y, type, dam)
 		else
 			game.logSeen(target, "%s hits %s for %s%0.2f %s damage#LAST#.", src.name:capitalize(), target.name, DamageType:get(type).text_color or "#aaaaaa#", dam, DamageType:get(type).name)
 		end
-		local sx, sy = game.level.map:getTileToScreen(x, y)
+	
 		if target:takeHit(dam, src) then
 			if src == game.player or target == game.player then
 				game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, "Kill!", {255,0,255})
+			end
+		elseif crit then
+			if src == game.player then
+				game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, "Crit "..tostring(-math.ceil(dam)).."!!", {0,255,0})
+			elseif target == game.player then
+				game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, "Crit "..tostring(-math.ceil(dam)).."!!", {255,0,0})
 			end
 		else
 			if src == game.player then
@@ -40,6 +48,14 @@ setDefaultProjector(function(src, x, y, type, dam)
 				game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, tostring(-math.ceil(dam)), {255,0,0})
 			end
 		end
+	end
+end
+
+-- The basic stuff used to damage a grid
+setDefaultProjector(function(src, x, y, type, dam, crit)
+	local target = game.level.map(x, y, Map.ACTOR)
+	if target then
+		doDamageFlyers(src, x, y, type, dam, crit)
 		return dam
 	end
 	return 0

@@ -21,7 +21,7 @@
 local KeyBind = require "engine.KeyBind"
 local DamageType = require "engine.DamageType"
 local ActorInventory = require "engine.interface.ActorInventory"
-local ActorStats = require "engine.interface.ActorStats"
+--local ActorStats = require "engine.interface.ActorStats"
 local ActorResource = require "engine.interface.ActorResource"
 local ActorTalents = require "engine.interface.ActorTalents"
 local ActorAI = require "engine.interface.ActorAI"
@@ -45,11 +45,6 @@ ActorTemporaryEffects:loadDefinition("/data/timed_effects.lua")
 -- Actor resources
 ActorResource:defineResource("Belief", "belief", nil, "belief_regen", "Belief represents my sense of wonder and imagination.")
 ActorResource:defineResource("Reason", "reason", nil, "reason_regen", "Reason represents my logic and higher thinking.")
-
--- Actor stats
-ActorStats:defineStat("Offense", "offense", 1, 1, 50,	"Strength defines your character's ability to apply physical force. It increases your melee damage, damage with heavy weapons, your chance to resist physical effects, and carrying capacity.")
-ActorStats:defineStat("Defense", "defense", 1, 1, 50,	"Dexterity defines your character's ability to be agile and alert. It increases your chance to hit, your ability to avoid attacks and your damage with light weapons.")
-ActorStats:defineStat("Armor", "armor", 1, 1, 50,		"Constitution defines your character's ability to withstand and resist damage. It increases your maximum life and physical resistance.")
 
 -- Actor inventory
 ActorInventory:defineInventory("MAINHAND", "Wielded in main hand", true, "I wield most weapons with this hand.")

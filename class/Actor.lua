@@ -58,7 +58,12 @@ function _M:init(t, no_default)
 	t.max_belief = t.max_belief or 5
 	
 	-- Default melee barehanded damage
-	self.combat = { dam=1 }
+	self.combat = {
+		offense = { dice = 1, sides = 6, base_target_number = 4 }, 
+		defense = { dice = 1, sides = 6, base_target_number = 4 }, 
+		damage 	= { dice = 1, sides = 6, base_target_number = 4 }, 
+		armor   = { dice = 1, sides = 6, base_target_number = 4 }, 
+	}
 
 	engine.Actor.init(self, t, no_default)
 	engine.interface.ActorInventory.init(self, t)
@@ -122,10 +127,15 @@ end
 
 -- TODO: VERBOSE when holding down control?
 function _M:tooltip()
+	local offense 	= self.combat.offense
+	local defense 	= self.combat.defense
+	local damage	= self.combat.damage
+	local armor		= self.combat.armor
 	return ([[#%s#%s#LAST#
 Offense %s
 Defense %s
-Armor   %s]]):format(self:colorLife(), self.name, self:getOffense(), self:getDefense(), self:getArmor())
+Damage  %s
+Armor   %s]]):format(self:colorLife(), self.name, offense.dice, defense.dice, damage.dice, armor.dice)
 --	self:getDisplayString(),
 --	self.level,
 --	self.life, self.life * 100 / self.max_life,

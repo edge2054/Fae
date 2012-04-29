@@ -63,15 +63,21 @@ function _M:drawDialog()
 	s:drawStringBlended(self.font, "Reason : "..(player.reason), w, h, 255, 255, 255, true) h = h + self.font_h + 4
 
         
-    h = h + self.font_h -- Adds an empty row
+    h = h + self.font_h + 4 -- Adds an empty row
     
     h = 0
     w = self.w * 0.25 
-    -- start on second column
-        
-    s:drawStringBlended(self.font, "Offense : "..(player:getOffense()).."d6", w, h, 255, 255, 255, true) h = h + self.font_h + 4
-    s:drawStringBlended(self.font, "Defense : "..(player:getDefense()).."d6", w, h, 255, 255, 255, true) h = h + self.font_h + 4
-    s:drawStringBlended(self.font, "Armor   : "..(player:getArmor()).."d6", w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	
+    -- Dice pools
+	local offense 	= player.combat.offense
+	local defense 	= player.combat.defense
+	local damage	= player.combat.damage
+	local armor		= player.combat.armor
+	
+	s:drawStringBlended(self.font, "Offense : "..(offense.dice).."d"..(offense.sides), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, "Defense : "..(defense.dice).."d"..(defense.sides), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, "Damage  : "..(damage.dice).."d"..(damage.sides), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, "Armor   : "..(armor.dice).."d"..(armor.sides), w, h, 255, 255, 255, true) h = h + self.font_h + 4
     
     self.c_desc:generate()
     self.changed = false
