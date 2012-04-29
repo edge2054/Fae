@@ -72,6 +72,9 @@ core.fov.set_algorithm("hex")
 -- Wall-sliding
 config.settings.player_slide = true
 
+-- Additional entities resolvers
+dofile("/mod/resolvers.lua")
+
 -- Makes ASCII on ASCII work somehow.  Just doing what DarkGod told me to do.... (and copying what Darren did :P)
 Map.updateMapDisplay = function (self, x, y, mos)
 	local g = self(x, y, self.TERRAIN)
