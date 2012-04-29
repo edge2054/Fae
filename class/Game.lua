@@ -66,7 +66,7 @@ end
 function _M:run()
 	self.player_display = PlayerDisplay.new(10, 0, self.w, self.h)
 	self.logdisplay = LogDisplay.new(0, self.h * 0.8, self.w * 0.5, self.h * 0.2, nil, nil, nil, {255,255,255}, {30,30,30})
-	self.hotkeys_display_icons = HotkeysIconsDisplay.new(nil, self.w * 0.1, self.h * 0.90, self.w * 0.5, self.h * 0.2, {255,255,255}, "/data/font/DroidSansMono.ttf", 10, game.h * 0.06, game.h * 0.06)
+	self.hotkeys_display_icons = HotkeysIconsDisplay.new(nil, 10, self.h * 0.90, self.w, self.h * 0.05, {255,255,255}, "/data/font/DroidSansMono.ttf", 10, game.h * 0.06, game.h * 0.06)
 	self.hotkeys_display_icons:enableShadow(0.6)
 	self.tooltip = Tooltip.new(nil, nil, {255,255,255}, {30,30,30})
 	self.flyers = FlyingText.new()
@@ -102,7 +102,7 @@ function _M:newGame()
 	self:setupDisplayMode()
 
 	self.creating_player = true
-	local birth = Birther.new(nil, self.player, {"base", "role" }, function()
+	local birth = Birther.new(nil, self.player, {"base"}, function()
 		self:changeLevel(1, "dungeon")
 		print("[PLAYER BIRTH] resolve...")
 		self.player:resolve()
@@ -121,7 +121,7 @@ function _M:loaded()
 	Map:setViewerActor(self.player)
 	local th = 48
 	local tw = math.floor(math.sqrt(0.75) * (th + 0.5))
-	Map:setViewPort(0, 0, self.w, self.h * 0.9, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
+	Map:setViewPort(0, 0, self.w, self.h * 0.8, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
 	engine.interface.GameMusic.loaded(self)
 	engine.interface.GameSound.loaded(self)
 	self:playMusic()
@@ -132,7 +132,7 @@ function _M:setupDisplayMode()
 --	print("[DISPLAY MODE] 32x32 ASCII/background")
 	local th = 48
 	local tw = math.floor(math.sqrt(0.75) * (th + 0.5))
-	Map:setViewPort(0, 0, self.w, self.h * 0.9, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
+	Map:setViewPort(0, 0, self.w, self.h * 0.8, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
 	Map:resetTiles()
 	Map.tiles.use_images = true
 

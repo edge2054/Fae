@@ -43,7 +43,8 @@ ActorTalents:loadDefinition("/data/talents.lua")
 ActorTemporaryEffects:loadDefinition("/data/timed_effects.lua")
 
 -- Actor resources
-ActorResource:defineResource("Power", "power", nil, "power_regen", "Power represent your ability to use special talents.")
+ActorResource:defineResource("Belief", "belief", nil, "belief_regen", "Belief represents my sense of wonder and imagination.")
+ActorResource:defineResource("Reason", "reason", nil, "reason_regen", "Reason represents my logic and higher thinking.")
 
 -- Actor stats
 ActorStats:defineStat("Strength",	"str", 10, 1, 100, "Strength defines your character's ability to apply physical force. It increases your melee damage, damage with heavy weapons, your chance to resist physical effects, and carrying capacity.")
@@ -71,6 +72,9 @@ core.fov.set_algorithm("hex")
 
 -- Wall-sliding
 config.settings.player_slide = true
+
+-- Additional entities resolvers
+dofile("/mod/resolvers.lua")
 
 -- Makes ASCII on ASCII work somehow.  Just doing what DarkGod told me to do.... (and copying what Darren did :P)
 Map.updateMapDisplay = function (self, x, y, mos)

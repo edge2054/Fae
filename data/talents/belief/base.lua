@@ -1,5 +1,5 @@
--- Fae
--- Copyright (C) 2012 Eric Wykoff
+-- ToME - Tales of Maj'Eyal
+-- Copyright (C) 2009, 2010, 2011, 2012 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -14,32 +14,20 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 --
--- Eric Wykoff "edge2054"
--- edge2054@gmail.com
+-- Nicolas Casalini "DarkGod"
+-- darkgod@te4.org
 
-newBirthDescriptor{
-	type = "base",
-	name = "base",
-	desc =	{
-		"I find myself lost.  A stranger in a strange land.  My only hope is to press forward and find a way home.",
-	},
-		
-	copy = {
-		lite = 3,
-		life = 20,
-		max_life = 20,
-		belief = 2,
-		reason = 3,
-	},
-	body = { INVEN = 10, MAINHAND = 1, OFFHAND = 1, BODY = 1, LAUNCHER = 1, QUIVER = 1},
-}
+newTalentType{ type="belief/base", name = "belief", hide = true, description = "The basic talents that define belief." }
 
---[[newBirthDescriptor{
-	type = "role",
-	name = "Rogue",
-	desc =
-	{
-		"I find myself lost.  A stranger in a strange land.  My only hope is to press forward and find a way home.",
-	},
+newTalent{
+	name = "Belief Pool",
+	type = {"belief/base", 1},
+	info = "Allows me to have a belief resource pool and manipulate reality with the power of my imagination.",
+	mode = "passive",
+	hide = true,
+	no_unlearn_last = true,
+	on_learn = function(self, t)
+		local set_belief = self:getReason()
+		self:incBelief(-set_belief)
+	end,
 }
-]]
