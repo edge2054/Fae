@@ -130,7 +130,7 @@ function _M:loaded()
 	Map:setViewerActor(self.player)
 	local th = 48
 	local tw = math.floor(math.sqrt(0.75) * (th + 0.5))
-	Map:setViewPort(0, 0, self.w, self.h * 0.92, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
+	Map:setViewPort(0, 0, self.w, self.h * 0.8, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
 	engine.interface.GameMusic.loaded(self)
 	engine.interface.GameSound.loaded(self)
 	self:playMusic()
@@ -141,7 +141,7 @@ function _M:setupDisplayMode()
 --	print("[DISPLAY MODE] 32x32 ASCII/background")
 	local th = 48
 	local tw = math.floor(math.sqrt(0.75) * (th + 0.5))
-	Map:setViewPort(0, 0, self.w, self.h * 0.92, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
+	Map:setViewPort(0, 0, self.w, self.h * 0.8, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
 	Map:resetTiles()
 	Map.tiles.use_images = true
 

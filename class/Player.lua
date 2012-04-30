@@ -342,12 +342,6 @@ end
 
 --- Move with the mouse
 -- We just feed our spotHostile to the interface mouseMove
-function _M:mouseMove(tmx, tmy)
-	return engine.interface.PlayerMouse.mouseMove(self, tmx, tmy, spotHostiles)
-end
-
---- Move with the mouse
--- We just feed our spotHostile to the interface mouseMove
 function _M:mouseMove(tmx, tmy, force_move)
 	local astar_check = function(x, y)
 		-- Dont do traps

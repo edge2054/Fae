@@ -52,12 +52,12 @@ function _M:resize(x, y, w, h)
 end
 
 function _M:mouseTooltip(text, w, h, x, y, click)
---	self.mouse:registerZone(x, y, w, h, function(button, mx, my, xrel, yrel, bx, by, event)
---		game.tooltip_x, game.tooltip_y = 1, 1; game.tooltip:displayAtMap(nil, nil, game.w, game.h, text)
---		if click and event == "button" and button == "left" then
---			click()
---		end
---	end)
+	self.mouse:registerZone(x, y, w, h, function(button, mx, my, xrel, yrel, bx, by, event)
+		game.tooltip_x, game.tooltip_y = 1, 1; game.tooltip:displayAtMap(nil, nil, game.w, game.h, text)
+		if click and event == "button" and button == "left" then
+			click()
+		end
+	end)
 	return w, h
 end
 
