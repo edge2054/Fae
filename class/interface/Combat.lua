@@ -27,7 +27,7 @@ local Talents = require "engine.interface.ActorTalents"
 module(..., package.seeall, class.make)
 
 --- Checks what to do with the target
--- Talk ? attack ? displace ?
+--  Talk ? attack ? displace ?
 function _M:bumpInto(target)
 	local reaction = self:reactionToward(target)
 	if reaction < 0 then
@@ -50,26 +50,26 @@ function _M:attackTarget(target, mult)
 	local hit = false
 	local dam = 0
 	-- Do we hit?  Is it a crit?
-	local successes, crit = self:doOpposedTest(self, target, self.combat.offense, target.combat.defense)
+	local successes, crit = self:doOpposedTest(self, target, self.offense, target.defense)
 	-- If we hit we resolve damage
 	if successes >= 0 then
 		hit = true
-		local damage = table.clone(self.combat.damage)
-		local armor = table.clone(target.combat.armor)
+		local damage_pool = table.clone(self.damage)
+		local armor_pool = table.clone(target.armor)
 		-- Did we crit?  Bonus damage
 		if crit then
-			damage.dice = damage.dice + successes
+			damage_pool.dice = damage_pool.dice + successes
 		end
 		-- Get the damage
-		dam = self:doOpposedTest(self, target, damage, armor)
+		dam = self:doOpposedTest(self, target, damage_pool, armor_pool)
 		-- And apply it
 		if dam > 0 then
 			DamageType:get(DamageType.PHYSICAL).projector(self, target.x, target.y, DamageType.PHYSICAL, math.max(0, dam), crit)
 		end
 	end
 	
-	-- Now do our combat flyers!!
-	-- We only call this if the damage is over 0, otherwise the projector will handle it
+	-- Now do our  flyers!!
+	-- We only call this if the damage is over 0, otherwise the projector handles it
 	if dam == 0 then
 		self:doCombatFlyers(self, target, hit)
 	end
@@ -78,9 +78,12 @@ function _M:attackTarget(target, mult)
 	self:useEnergy(game.energy_to_act)
 end
 
--- Returns a number of successes based on how many dice equal or exceed the target number
--- Dice defaults to 1; Sides to 6, Target Number to 4
-function _M:getSuccesses(t)
+--- Dice Functions
+
+--- Basic Success Test
+--  Returns a number of successes based on how many dice equal or exceed the target number
+--  Dice defaults to 1; Sides to 6, Target Number to 4
+function _M:doSuccessTest(t)
 	local successes = 0
 	local dice = t.dice or 1
 	local sides = t.sides or 6
@@ -94,30 +97,42 @@ function _M:getSuccesses(t)
 	return successes
 end
 
--- This is basically an oppossed dice check
-function _M:doOpposedTest(self, target, self_offense, target_defense)
-	local attack_roll = self:getSuccesses(self_offense)
-	local defense_roll = target:getSuccesses(target_defense)
-	local successes = attack_roll - defense_roll
-	-- Fudge 0s to bias towards combat resolution
-	if successes == 0 then
-		successes = 1
+--- Oppossed Success Test
+--  Rolls attacker's and target's dice pools
+--  Returns net attacker successes and crit (when attacker's net successes exceed the target's pool)
+function _M:doOpposedTest(self, target, self_pool, target_pool)
+	local self_successes = self:doSuccessTest(self_pool)
+	local target_successes = target:doSuccessTest(target_pool)
+	local net_successes = self_successes - target_successes
+	
+	-- Fudge 0s to bias towards resolution
+	if net_successes == 0 then
+		net_successes = 1
 	end
 	
 	-- Does the test crit?
 	-- Used for damage resolution
 	local crit = false
-	if successes > target_defense.dice then
+	if net_successes > target_pool.dice then
 		crit = true
 	end
 	
-	return successes, crit
+	return net_successes, crit
 end
 
+--- Total Dice Roll
+--  This is just a short cut and doesn't do anything rng.dice doesn't
+--  Rolls a dice pool and returns the sum
+function _M:doTotalDiceRoll(pool)
+	return rng.dice(pool.dice, pool.sides)
+end
+
+--- Combat Flyers; produces varying flyers based on combat results
+--  This does not do damage flyers; those are done in damage_types.lua
 function _M:doCombatFlyers(self, target, hit)
 	local sx, sy = game.level.map:getTileToScreen(target.x, target.y)
 	if hit then
-	if self == game.player and damage <= 0 then
+		if self == game.player and damage <= 0 then
 			game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, "Soaked...", {255,0,255})
 		elseif target == game.player and damage <= 0 then
 			game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, "Soaked!", {0, 255, 0})

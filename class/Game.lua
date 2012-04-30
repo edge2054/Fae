@@ -69,8 +69,13 @@ function _M:run()
 	self.hotkeys_display_icons = HotkeysIconsDisplay.new(nil, 10, self.h * 0.90, self.w, self.h * 0.05, {255,255,255}, "/data/font/DroidSansMono.ttf", 10, game.h * 0.06, game.h * 0.06)
 	self.hotkeys_display_icons:enableShadow(0.6)
 	self.tooltip = Tooltip.new(nil, nil, {255,255,255}, {30,30,30})
-	self.flyers = FlyingText.new()
+
+		
+	local flysize = 16
+	self.flyers = FlyingText.new("/data/font/DroidSansMono.ttf", flysize, "/data/font/DroidSansMono.ttf", flysize + 3)
+	self.flyers:enableShadow(0.6)
 	self:setFlyingText(self.flyers)
+
 
 	self.log = function(style, ...) if type(style) == "number" then self.logdisplay(...) else self.logdisplay(style, ...) end end
 	self.logSeen = function(e, style, ...) if e and self.level.map.seens(e.x, e.y) then self.log(style, ...) end end

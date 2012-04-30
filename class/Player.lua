@@ -61,6 +61,8 @@ function _M:init(t, no_default)
 	t.name = "Alex"
 	
 	t.lite = t.lite or 0
+	
+	t.old_life = 0
 
 	mod.class.Actor.init(self, t, no_default)
 	engine.interface.PlayerHotkeys.init(self, t)
@@ -88,6 +90,11 @@ end
 
 function _M:act()
 	if not mod.class.Actor.act(self) then return end
+	
+	-- Funky shader things !
+	self:updateMainShader()
+
+	self.old_life = self.life
 
 	-- Resting ? Running ? Otherwise pause
 	if not self:restStep() and not self:runStep() and self.player then
@@ -113,13 +120,20 @@ end
 
 --- Called before taking a hit, overload mod.class.Actor:onTakeHit() to stop resting and running
 function _M:onTakeHit(value, src)
+	-- Stop running and Resting
 	self:runStop("taken damage")
 	self:restStop("taken damage")
+	
+	-- Toss out a low health flyer at 30%, 20%, and every time we're hit while at 10% or less
 	local ret = mod.class.Actor.onTakeHit(self, value, src)
-	if self.life < self.max_life * 0.3 then
+	local thirty_percent = self.old_life > self.max_life * 0.3 and self.life - ret <= self.max_life * 0.3
+	local twenty_percent = self.old_life > self.max_life * 0.2 and self.life - ret <= self.max_life * 0.2
+	local under_ten_percent = self.life - ret <= self.max_life * 0.1
+	if thirty_percent or twenty_percent or under_ten_percent then
 		local sx, sy = game.level.map:getTileToScreen(self.x, self.y)
-		game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, 2, "LOW HEALTH!", {255,0,0}, true)
+		game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, 2, "My health is low!", {255,0,0}, true)
 	end
+	
 	return ret
 end
 
@@ -386,20 +400,12 @@ end
 --- Funky shader stuff
 function _M:updateMainShader()
 	if game.fbo_shader then
-		-- Set shader HP warning
 		if self.life ~= self.old_life then
-			if self.life < 20 then game.fbo_shader:setUniform("hp_warning", 1 - (self.life / self.max_life))
-			else game.fbo_shader:setUniform("hp_warning", 0) end
-		end
-
-		-- Intensify shader
-		if self.raging then game.fbo_shader:setUniform("intensify", {1,0,0,1})
-		else game.fbo_shader:setUniform("intensify", {0,0,0,0}) -- Disable
-		end
-		
-		-- Blur shader
-		if self.raging then game.fbo_shader:setUniform("blur", 1)
-		else game.fbo_shader:setUniform("blur", 0) -- Disable
+			if self.life < self.max_life * 0.3 then
+				game.fbo_shader:setUniform("hp_warning", 1 - (self.life / self.max_life))
+			else
+				game.fbo_shader:setUniform("hp_warning", 0)
+			end
 		end
 	end
 end

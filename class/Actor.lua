@@ -47,24 +47,20 @@ module(..., package.seeall, class.inherit(
 ))
 
 function _M:init(t, no_default)
-	-- Define some basic combat stats
-	self.combat_armor = 0
+	-- Define combat dice pools
+	self.offense = { dice = 1, sides = 6, base_target_number = 4 } 
+	self.defense = { dice = 1, sides = 6, base_target_number = 4 } 
+	self.damage  = { dice = 1, sides = 6, base_target_number = 4 } 
+	self.armor   = { dice = 1, sides = 6, base_target_number = 4 } 
 
 	-- Default regen
-	t.life_regen = t.life_regen or 0.1 -- Life regen real slow
+	t.life_regen = t.life_regen or 0.1
+	t.life_regen_pool = t.life_regen_pool or 0
 	
 	-- Resources
 	t.max_reason = t.max_reason or 5
 	t.max_belief = t.max_belief or 5
 	
-	-- Default melee barehanded damage
-	self.combat = {
-		offense = { dice = 1, sides = 6, base_target_number = 4 }, 
-		defense = { dice = 1, sides = 6, base_target_number = 4 }, 
-		damage 	= { dice = 1, sides = 6, base_target_number = 4 }, 
-		armor   = { dice = 1, sides = 6, base_target_number = 4 }, 
-	}
-
 	engine.Actor.init(self, t, no_default)
 	engine.interface.ActorInventory.init(self, t)
 	engine.interface.ActorTemporaryEffects.init(self, t)
@@ -84,8 +80,12 @@ function _M:act()
 
 	-- Cooldown talents
 	self:cooldownTalents()
-	-- Regen resources
-	self:regenLife()
+	-- Regen life
+	
+	if self.life < self.max_life and self.life_regen > 0 then
+		self:regenLife()
+	end
+	-- Regen Resources??  May remove this later
 	self:regenResources()
 	-- Compute timed effects
 	self:timedEffects()
@@ -107,6 +107,24 @@ function _M:move(x, y, force)
 	return moved
 end
 
+--- Regenerate life 
+-- Life regen only ticks when the life_regen_pool is a whole number
+-- This is mostly because I'm OCD and want whole numbers!!
+function _M:regenLife()
+	-- Increase the pool size
+	self.life_regen_pool = self.life_regen_pool + self.life_regen
+	-- If the pool is greater then 1 we heal
+	if self.life_regen_pool >= 1 then
+		-- round it down
+		local regen_now = math.floor(self.life_regen_pool)
+		-- but keep the decimal
+		self.life_regen_pool = self.life_regen_pool - regen_now
+		-- and regen
+		self.life = util.bound(self.life + regen_now, self.die_at, self.max_life)
+	end
+end
+
+-- Colorizes the Life display as Life goes down
 function _M:colorLife()
 	local missing_life = self.max_life - self.life
 	local color
@@ -127,15 +145,16 @@ end
 
 -- TODO: VERBOSE when holding down control?
 function _M:tooltip()
-	local offense 	= self.combat.offense
-	local defense 	= self.combat.defense
-	local damage	= self.combat.damage
-	local armor		= self.combat.armor
+	local offense 	= self.offense
+	local defense 	= self.defense
+	local damage	= self.damage
+	local armor		= self.armor
 	return ([[#%s#%s#LAST#
 Offense %s
 Defense %s
 Damage  %s
-Armor   %s]]):format(self:colorLife(), self.name, offense.dice, defense.dice, damage.dice, armor.dice)
+Armor   %s
+Life    %s/%s]]):format(self:colorLife(), self.name, offense.dice, defense.dice, damage.dice, armor.dice, self.life, self.max_life)
 --	self:getDisplayString(),
 --	self.level,
 --	self.life, self.life * 100 / self.max_life,
@@ -374,4 +393,16 @@ function _M:defineDisplayCallback()
 		end
 		return true
 	end)
+end
+
+--- Call when added to a level
+-- Used to make escorts and such
+function _M:addedToLevel(level, x, y)
+	if not self._rst_full then self:resetToFull() self._rst_full = true end -- Only do it once, the first time we come into being
+	self:check("on_added_to_level", level, x, y)
+end
+
+function _M:resetToFull()
+	if self.dead then return end
+	self.life = self.max_life
 end

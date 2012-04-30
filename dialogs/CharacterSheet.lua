@@ -69,10 +69,10 @@ function _M:drawDialog()
     w = self.w * 0.25 
 	
     -- Dice pools
-	local offense 	= player.combat.offense
-	local defense 	= player.combat.defense
-	local damage	= player.combat.damage
-	local armor		= player.combat.armor
+	local offense 	= player.offense
+	local defense 	= player.defense
+	local damage	= player.damage
+	local armor		= player.armor
 	
 	s:drawStringBlended(self.font, "Offense : "..(offense.dice).."d"..(offense.sides), w, h, 255, 255, 255, true) h = h + self.font_h + 4
 	s:drawStringBlended(self.font, "Defense : "..(defense.dice).."d"..(defense.sides), w, h, 255, 255, 255, true) h = h + self.font_h + 4

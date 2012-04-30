@@ -23,12 +23,14 @@ local function doDamageFlyers(src, x, y, type, dam, crit)
 	local sx, sy = game.level.map:getTileToScreen(target.x, target.y)
 	
 	if target then
+		local hit_type = "hit"
+		if crit then hit_type = "crit" end
 		if src == game.player then
-			game.logSeen(target, "I hit %s for %s%0.2f %s damage#LAST#.", target.name, DamageType:get(type).text_color or "#aaaaaa#", dam, DamageType:get(type).name)
+			game.logSeen(target, "I %s %s for %s%0.2f %s#LAST# damage.", hit_type, target.name, DamageType:get(type).text_color or "#aaaaaa#", dam, DamageType:get(type).name)
 		elseif target == game.player then
-			game.logSeen(target, "%s hit me for %s%0.2f %s damage#LAST#.", src.name:capitalize(), DamageType:get(type).text_color or "#aaaaaa#", dam, DamageType:get(type).name)
+			game.logSeen(target, "%s %s me for %s%0.2f %s#LAST# damage.", src.name:capitalize(), hit_type, DamageType:get(type).text_color or "#aaaaaa#", dam, DamageType:get(type).name)
 		else
-			game.logSeen(target, "%s hits %s for %s%0.2f %s damage#LAST#.", src.name:capitalize(), target.name, DamageType:get(type).text_color or "#aaaaaa#", dam, DamageType:get(type).name)
+			game.logSeen(target, "%s %s %s for %s%0.2f %s#LAST# damage.", src.name:capitalize(), hit_type, target.name, DamageType:get(type).text_color or "#aaaaaa#", dam, DamageType:get(type).name)
 		end
 	
 		if target:takeHit(dam, src) then
@@ -65,7 +67,6 @@ newDamageType{
 	name = "physical", type = "PHYSICAL",
 }
 
--- Acid destroys potions
 newDamageType{
 	name = "acid", type = "ACID", text_color = "#GREEN#",
 }
