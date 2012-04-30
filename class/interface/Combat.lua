@@ -105,8 +105,8 @@ function _M:doOpposedTest(self, target, self_pool, target_pool)
 	local target_successes = target:doSuccessTest(target_pool)
 	local net_successes = self_successes - target_successes
 	
-	-- Fudge 0s to bias towards resolution
-	if net_successes == 0 then
+	-- Fudge ties towards success to bias combat towards resolution
+	if self_successes > 1 and net_successes == 0 then
 		net_successes = 1
 	end
 	
