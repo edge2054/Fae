@@ -131,7 +131,8 @@ function _M:onTakeHit(value, src)
 	local under_ten_percent = self.life - ret <= self.max_life * 0.1
 	if thirty_percent or twenty_percent or under_ten_percent then
 		local sx, sy = game.level.map:getTileToScreen(self.x, self.y)
-		game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, 2, "My health is low!", {255,0,0}, true)
+		local messages = { "I don't feel well...", "I'll need healing very soon!", "I don't think I'll make it..." }
+		game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, 2, rng.table(messages), {255,0,0}, true)
 	end
 	
 	return ret

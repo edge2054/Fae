@@ -144,6 +144,7 @@ function _M:colorLife()
 end
 
 -- TODO: VERBOSE when holding down control?
+-- Some of this is just for debugging for now
 function _M:tooltip()
 	local offense 	= self.offense
 	local defense 	= self.defense
