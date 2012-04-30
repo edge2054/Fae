@@ -137,13 +137,13 @@ function _M:doCombatFlyers(self, target, hit)
 			game.logSeen(target, "%s soaked my attack.", target.name:capitalize())
 		elseif target == game.player then
 			game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, "Soaked!", {0, 255, 0})
-			game.logSeen(target, "I soaked %s's attack.", self.name:capitalize())
+			game.logSeen(target, "I soaked %s's attack.", self.name)
 		end
 	elseif self == game.player then
 		game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, "Missed...", {255,0,255})
 		game.logSeen(target, "%s dodged my attack.", target.name:capitalize())
 	elseif target == game.player then
 		game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, "Dodged!", {0, 255, 0})
-		game.logSeen(target, "I dodged %s's attack.", self.name:capitalize())
+		game.logSeen(target, "I dodged %s's attack.", self.name)
 	end
 end
