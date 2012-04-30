@@ -64,19 +64,23 @@ function _M:init()
 end
 
 function _M:run()
+	-- UI
 	self.player_display = PlayerDisplay.new(10, 0, self.w, self.h)
 	self.logdisplay = LogDisplay.new(0, self.h * 0.8, self.w * 0.5, self.h * 0.2, nil, nil, nil, {255,255,255}, {30,30,30})
-	self.hotkeys_display_icons = HotkeysIconsDisplay.new(nil, 10, self.h * 0.90, self.w, self.h * 0.05, {255,255,255}, "/data/font/DroidSansMono.ttf", 10, game.h * 0.06, game.h * 0.06)
+	self.hotkeys_display_icons = HotkeysIconsDisplay.new(nil, self.w *0.01, self.h * 0.93, self.w, 0, {255,255,255}, "/data/font/DroidSansMono.ttf", 10, game.h * 0.06, game.h * 0.06)
 	self.hotkeys_display_icons:enableShadow(0.6)
 	self.tooltip = Tooltip.new(nil, nil, {255,255,255}, {30,30,30})
 
-		
+	--UI Elements (frames and what not)
+	self.ui_hotkeys_texture = {core.display.loadImage("/data/gfx/ui/green_texture.png"):glTexture()}
+	
+	-- Flyers
 	local flysize = 16
 	self.flyers = FlyingText.new("/data/font/DroidSansMono.ttf", flysize, "/data/font/DroidSansMono.ttf", flysize + 3)
 	self.flyers:enableShadow(0.6)
 	self:setFlyingText(self.flyers)
 
-
+	-- Game Log
 	self.log = function(style, ...) if type(style) == "number" then self.logdisplay(...) else self.logdisplay(style, ...) end end
 	self.logSeen = function(e, style, ...) if e and self.level.map.seens(e.x, e.y) then self.log(style, ...) end end
 	self.logPlayer = function(e, style, ...) if e == self.player then self.log(style, ...) end end
@@ -126,7 +130,7 @@ function _M:loaded()
 	Map:setViewerActor(self.player)
 	local th = 48
 	local tw = math.floor(math.sqrt(0.75) * (th + 0.5))
-	Map:setViewPort(0, 0, self.w, self.h * 0.8, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
+	Map:setViewPort(0, 0, self.w, self.h * 0.92, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
 	engine.interface.GameMusic.loaded(self)
 	engine.interface.GameSound.loaded(self)
 	self:playMusic()
@@ -137,7 +141,7 @@ function _M:setupDisplayMode()
 --	print("[DISPLAY MODE] 32x32 ASCII/background")
 	local th = 48
 	local tw = math.floor(math.sqrt(0.75) * (th + 0.5))
-	Map:setViewPort(0, 0, self.w, self.h * 0.8, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
+	Map:setViewPort(0, 0, self.w, self.h * 0.92, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
 	Map:resetTiles()
 	Map.tiles.use_images = true
 
@@ -261,6 +265,8 @@ function _M:display(nb_keyframe)
 	if self.change_res_dialog then engine.GameTurnBased.display(self, nb_keyframe) return end
 	if self.full_fbo then self.full_fbo:use(true) end
 
+	local map = game.level.map
+	
 	-- Now the map, if any
 	if self.level and self.level.map and self.level.map.finished then
 		-- Display the map and compute FOV for the player if needed
@@ -269,11 +275,10 @@ function _M:display(nb_keyframe)
 		end
 
 		-- Display using Framebuffer, so that we can use shaders and all
-		  local map = game.level.map
-		  if self.fbo then
+			if self.fbo then
 			 self.fbo:use(true)
-				map:display(0, 0, nb_keyframe, true)
-				map._map:drawSeensTexture(0, 0, nb_keyframes)
+				map:display(0, 0, nb_keyframe)
+				--map._map:drawSeensTexture(0, 0, nb_keyframes) -- uncomment to enable smooth fog of war
 			 self.fbo:use(false, self.full_fbo)
 			 self.fbo:toScreen(map.display_x, map.display_y, map.viewport.width, map.viewport.height, self.fbo_shader.shad)
 
@@ -290,8 +295,11 @@ function _M:display(nb_keyframe)
 	end
 
 	-- We display the player's interface
+	self.ui_hotkeys_texture[1]:toScreen(0, self.h * 0.92, self.w * 1.5, self.h * 0.12)
+	--self.ui_hotkeys_texture[1]:toScreen(map.w * 0.01, map.h * 15.4, map.w, map.h, map.w * self.ui_hotkeys_texture[2] / self.ui_hotkeys_texture[7], map.h * self.ui_hotkeys_texture[3] / self.ui_hotkeys_texture[7])
 	self.player_display:toScreen(nb_keyframe)
 	self.hotkeys_display_icons:toScreen()
+	
 
 	if self.player then self.player.changed = false end
 
@@ -304,38 +312,6 @@ function _M:display(nb_keyframe)
       self.full_fbo:toScreen(0, 0, self.w, self.h, self.full_fbo_shader.shad)
    end
 end
-
---[[function _M:display(nb_keyframe)
-	-- If switching resolution, blank everything but the dialog
-	if self.change_res_dialog then engine.GameTurnBased.display(self, nb_keyframe) return end
-
-	-- Now the map, if any
-	if self.level and self.level.map and self.level.map.finished then
-		-- Display the map and compute FOV for the player if needed
-		if self.level.map.changed then
-			self.player:playerFOV()
-		end
-
-		self.level.map:display(nil, nil, nb_keyframe)
-
-		-- Display the targetting system if active
-		self.target:display()
-
-		-- And the minimap
-		--self.level.map:minimapDisplay(self.w - 200, 20, util.bound(self.player.x - 25, 0, self.level.map.w - 50), util.bound(self.player.y - 25, 0, self.level.map.h - 50), 50, 50, 0.6)
-	end
-
-	-- We display the player's interface
-	self.player_display:toScreen(nb_keyframe)
-	self.hotkeys_display_icons:toScreen()
-
-	if self.player then self.player.changed = false end
-
-	-- Tooltip is displayed over all else
-	self:targetDisplayTooltip()
-
-	engine.GameTurnBased.display(self, nb_keyframe)
-end]]
 
 --- Setup the keybinds
 function _M:setupCommands()
