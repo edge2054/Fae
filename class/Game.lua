@@ -111,7 +111,7 @@ function _M:newGame()
 	self:setupDisplayMode()
 
 	self.creating_player = true
-	local birth = Birther.new(nil, self.player, {"base"}, function()
+	local birth = Birther.new(nil, self.player, {"base", "role"}, function()
 		self:changeLevel(1, "dungeon")
 		print("[PLAYER BIRTH] resolve...")
 		self.player:resolve()
@@ -260,13 +260,20 @@ function _M:onTurn()
 	self.level.map:processEffects()
 end
 
+-- A nice function for playing sound at a position without to much hassle (thanks Darkgod :) )
+function _M:playSoundNear(who, name)
+	if who and self.level.map.seens(who.x, who.y) then
+		local pos = {x=0,y=0,z=0}
+		if self.player and self.player.x then pos.x, pos.y = who.x - self.player.x, who.y - self.player.y end
+		self:playSound(name, pos)
+	end
+end
+
 function _M:display(nb_keyframe)
 	-- If switching resolution, blank everything but the dialog
 	if self.change_res_dialog then engine.GameTurnBased.display(self, nb_keyframe) return end
 	if self.full_fbo then self.full_fbo:use(true) end
 
-	local map = game.level.map
-	
 	-- Now the map, if any
 	if self.level and self.level.map and self.level.map.finished then
 		-- Display the map and compute FOV for the player if needed
@@ -274,8 +281,9 @@ function _M:display(nb_keyframe)
 			self.player:playerFOV()
 		end
 
+		local map = game.level.map
 		-- Display using Framebuffer, so that we can use shaders and all
-			if self.fbo then
+		if self.fbo then
 			 self.fbo:use(true)
 				map:display(0, 0, nb_keyframe)
 				--map._map:drawSeensTexture(0, 0, nb_keyframes) -- uncomment to enable smooth fog of war

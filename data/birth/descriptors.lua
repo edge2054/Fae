@@ -39,3 +39,29 @@ newBirthDescriptor{
 	
 	body = { INVEN = 10, MAINHAND = 1, OFFHAND = 1, BODY = 1, SHOOTER = 1, AMMO = 1},
 }
+
+newBirthDescriptor{
+	type = "role",
+	name = "Hiker",
+	desc =	{
+		"While exploring some old trails I stumbled upon an area of forest unlike anything I would have ever imagined",
+	},
+}
+
+newBirthDescriptor{
+	type = "role",
+	name = "Hippie",
+	desc =	{
+		"What a strange trip this has been",
+		
+		"#GOLD#The hippie
+	},
+}
+
+newBirthDescriptor{
+	type = "role",
+	name = "Hunter",
+	desc =	{
+		"These woods look old and untouched, I can only imagine the game I might find back here.",
+	},
+}
