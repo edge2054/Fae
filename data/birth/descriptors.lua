@@ -54,7 +54,7 @@ newBirthDescriptor{
 	desc =	{
 		"What a strange trip this has been",
 		
-		"#GOLD#The hippie
+		"#GOLD#The hippie"
 	},
 }
 

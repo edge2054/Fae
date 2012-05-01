@@ -26,11 +26,11 @@ local function doDamageFlyers(src, x, y, type, dam, crit)
 		local hit_type = "hit"
 		if crit then hit_type = "crit" end
 		if src == game.player then
-			game.logSeen(target, "I %s %s for %s%0.2f %s#LAST# damage.", hit_type, target.name, DamageType:get(type).text_color or "#aaaaaa#", dam, DamageType:get(type).name)
+			game.logSeen(target, "I %s %s for %s%d %s#LAST# damage.", hit_type, target.name, DamageType:get(type).text_color or "#aaaaaa#", dam, DamageType:get(type).name)
 		elseif target == game.player then
-			game.logSeen(target, "%s %s me for %s%0.2f %s#LAST# damage.", src.name:capitalize(), hit_type, DamageType:get(type).text_color or "#aaaaaa#", dam, DamageType:get(type).name)
+			game.logSeen(target, "%s %s me for %s%d %s#LAST# damage.", src.name:capitalize(), hit_type, DamageType:get(type).text_color or "#aaaaaa#", dam, DamageType:get(type).name)
 		else
-			game.logSeen(target, "%s %s %s for %s%0.2f %s#LAST# damage.", src.name:capitalize(), hit_type, target.name, DamageType:get(type).text_color or "#aaaaaa#", dam, DamageType:get(type).name)
+			game.logSeen(target, "%s %s %s for %s%d %s#LAST# damage.", src.name:capitalize(), hit_type, target.name, DamageType:get(type).text_color or "#aaaaaa#", dam, DamageType:get(type).name)
 		end
 	
 		if target:takeHit(dam, src) then

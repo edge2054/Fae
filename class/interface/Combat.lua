@@ -82,18 +82,29 @@ end
 
 --- Basic Success Test
 --  Returns a number of successes based on how many dice equal or exceed the target number
---  Dice defaults to 1; Sides to 6, Target Number to 4
+--  Dice defaults to 1; Sides to 10, Target Number to 6
+-- 	Dice that roll 10 or higher are rolled again, potentially producing more successes
 function _M:doSuccessTest(t)
 	local successes = 0
 	local dice = t.dice or 1
-	local sides = t.sides or 6
-	local target_number = t.base_target_number or 4
-	for i = 1, dice do
-		if rng.dice(1, sides) >= target_number then
+	local sides = t.sides or 10
+	local target_number = t.base_target_number or 6
+--	print(("%s rolling %dd%d dice..."):format(self.name:capitalize(), t.dice, t.sides))
+	while dice > 0 do
+		local roll = rng.dice(1, sides)
+	--	print("Roll: ", roll)
+		if roll >= target_number then
 			successes = successes + 1
 		end
+		if roll < 10 then
+				dice = dice - 1
+		else
+	--		print("A die exploded and was added back into the pool!")
+		end
+	--	print("Dice Left: ", dice)
 	end
-	print(("%s rolling %sd%s against target number %s.  %s successes achieved."):format(self.name:capitalize (), dice, sides, target_number, successes))
+	
+	print(("%s rolled %dd%d against target number %d.  %d successes achieved."):format(self.name:capitalize(), t.dice, sides, target_number, successes))
 	return successes
 end
 

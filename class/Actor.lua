@@ -48,10 +48,10 @@ module(..., package.seeall, class.inherit(
 
 function _M:init(t, no_default)
 	-- Define combat dice pools
-	self.offense = { dice = 1, sides = 6, base_target_number = 4 } 
-	self.defense = { dice = 1, sides = 6, base_target_number = 4 } 
-	self.damage  = { dice = 1, sides = 6, base_target_number = 4 } 
-	self.armor   = { dice = 1, sides = 6, base_target_number = 4 } 
+	self.offense = { dice = 1, sides = 10, base_target_number = 6 } 
+	self.defense = { dice = 1, sides = 10, base_target_number = 6 } 
+	self.damage  = { dice = 1, sides = 10, base_target_number = 6 } 
+	self.armor   = { dice = 1, sides = 10, base_target_number = 6 } 
 
 	-- Default regen
 	t.life_regen = t.life_regen or 0.1

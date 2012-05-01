@@ -58,6 +58,7 @@ function _M:drawDialog()
     h = 0
     w = 0
     s:drawStringBlended(self.font, "Name   : "..(player.name or "Unnamed"), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, "Role   : "..(player.descriptor.role), w, h, 255, 255, 255, true) h = h + self.font_h + 4
 	s:drawStringBlended(self.font, "Life   : "..(player.life), w, h, 255, 255, 255, true) h = h + self.font_h + 4
 	s:drawStringBlended(self.font, "Belief : "..(player.belief), w, h, 255, 255, 255, true) h = h + self.font_h + 4
 	s:drawStringBlended(self.font, "Reason : "..(player.reason), w, h, 255, 255, 255, true) h = h + self.font_h + 4
