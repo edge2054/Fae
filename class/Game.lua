@@ -72,7 +72,7 @@ function _M:run()
 	self.tooltip = Tooltip.new(nil, nil, {255,255,255}, {30,30,30})
 
 	--UI Elements (frames and what not)
-	self.ui_hotkeys_texture = {core.display.loadImage("/data/gfx/ui/green_texture.png"):glTexture()}
+	self.ui_texture_bar = {core.display.loadImage("/data/gfx/ui/texture_bar_grey.png"):glTexture()}
 	
 	-- Flyers
 	local flysize = 16
@@ -295,8 +295,7 @@ function _M:display(nb_keyframe)
 	end
 
 	-- We display the player's interface
-	self.ui_hotkeys_texture[1]:toScreen(0, self.h * 0.92, self.w * 1.5, self.h * 0.12)
-	--self.ui_hotkeys_texture[1]:toScreen(map.w * 0.01, map.h * 15.4, map.w, map.h, map.w * self.ui_hotkeys_texture[2] / self.ui_hotkeys_texture[7], map.h * self.ui_hotkeys_texture[3] / self.ui_hotkeys_texture[7])
+	self.ui_texture_bar[1]:toScreen(0, self.h * 0.92, self.w * 1.5, self.h * 0.12)
 	self.player_display:toScreen(nb_keyframe)
 	self.hotkeys_display_icons:toScreen()
 	
