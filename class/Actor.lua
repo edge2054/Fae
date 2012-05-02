@@ -20,6 +20,8 @@
 require "engine.class"
 require "engine.Actor"
 require "engine.Autolevel"
+require "engine.interface.ActorStats"
+require "engine.interface.ActorResource"
 require "engine.interface.ActorInventory"
 require "engine.interface.ActorTemporaryEffects"
 require "engine.interface.ActorLife"
@@ -37,25 +39,38 @@ module(..., package.seeall, class.inherit(
 	engine.interface.ActorLife,
 	engine.interface.ActorProject,
 	engine.interface.ActorLevel,
+	engine.interface.ActorStats,
 	engine.interface.ActorTalents,
+	engine.interface.ActorResource,
 	engine.interface.ActorFOV,
 	mod.class.interface.Combat
 ))
 
 function _M:init(t, no_default)
-	-- Define combat dice pools
-	t.offense  = { dice = 1, sides = 10, base_target_number = 6 } 
-	t.defense  = { dice = 1, sides = 10, base_target_number = 6 } 
-	t.damage   = { dice = 1, sides = 10, base_target_number = 6 } 
-	t.armor    = { dice = 1, sides = 10, base_target_number = 6 } 
-
-	-- Define Dreaming and Reason; our Resources
-	t.dreaming = { dice = 5, sides = 10, base_target_number = 6 }
-	t.reason   = { dice = 5, sides = 10, base_target_number = 6 } 
+	-- Stat and Resource modifiers
+	self.offense_sides
+	self.offense_target_modifier
+	self.defense_sides
+	self.defense_target_modifier
+	self.damage_sides
+	self.damage_target_modifier
+	self.armor_sides
+	self.armor_target_modifier
+	self.dreaming_sides
+	self.dreaming_target_modifier
+	self.reason_sides
+	self.reason_target_modifier
 	
+	-- Resources
+	t.max_dreaming = t.max_dreaming or 5
+	t.max_reason = t.max_reason or 5
+		
 	-- Default regen
 	t.life_regen = t.life_regen or 0.1
 	t.life_regen_pool = t.life_regen_pool or 0
+	t.draming_regen = t.dreaming_regen or 1
+	t.reason_regen = t.reason_regen or 1
+	
 	
 	engine.Actor.init(self, t, no_default)
 	engine.interface.ActorInventory.init(self, t)
@@ -63,6 +78,8 @@ function _M:init(t, no_default)
 	engine.interface.ActorLife.init(self, t)
 	engine.interface.ActorProject.init(self, t)
 	engine.interface.ActorTalents.init(self, t)
+	engine.interface.ActorResource.init(self, t)
+	engine.interface.ActorStats.init(self, t)
 	engine.interface.ActorLevel.init(self, t)
 	engine.interface.ActorFOV.init(self, t)
 end
@@ -75,10 +92,11 @@ function _M:act()
 	-- Cooldown talents
 	self:cooldownTalents()
 	-- Regen life
-	
 	if self.life < self.max_life and self.life_regen > 0 then
 		self:regenLife()
 	end
+	-- Regen Resources??  May remove this later
+	self:regenResources()
 	-- Compute timed effects
 	self:timedEffects()
 
@@ -138,16 +156,12 @@ end
 -- TODO: VERBOSE when holding down control?
 -- Some of this is just for debugging for now
 function _M:tooltip()
-	local offense 	= self.offense
-	local defense 	= self.defense
-	local damage	= self.damage
-	local armor		= self.armor
 	return ([[#%s#%s#LAST#
 Offense %s
 Defense %s
 Damage  %s
 Armor   %s
-Life    %s/%s]]):format(self:colorLife(), self.name, offense.dice, defense.dice, damage.dice, armor.dice, self.life, self.max_life)
+Life    %s/%s]]):format(self:colorLife(), self.name, self:getOffense(), self:getDefense(), self:getDamage(), self:getArmor(), self.life, self.max_life)
 --	self:getDisplayString(),
 --	self.level,
 --	self.life, self.life * 100 / self.max_life,

@@ -59,10 +59,10 @@ newEntity{
     level_range = {1, 10},
     cost = 5,
     combat = {
-        dam = 10,
+
     },
 	wielder = {
-		offense = { dice = 10},
+
 	},
 }
 
@@ -70,7 +70,6 @@ newEntity{
 	base = "BASE_BOW",
 	name = "basic bow",
 	level_range = {1, 10},
-	require = { stat = { dex=10}, },
 	cost = 5,
 	combat = {
 		dam = 10,
@@ -81,7 +80,6 @@ newEntity{
 	base = "BASE_ARROW",
 	name = "wood arrow",
 	level_range = {1, 10},
-	require = { stat = { dex=10}, },
 	cost = 0.05,
 	combat = {
 		dam = 10,

@@ -20,6 +20,7 @@
 require "engine.class"
 
 local Dialog = require "engine.ui.Dialog"
+local Stats = require "engine.interface.ActorStats"
 local Talents = require "engine.interface.ActorTalents"
 local SurfaceZone = require "engine.ui.SurfaceZone"
 local Textzone = require "engine.ui.Textzone"
@@ -62,26 +63,19 @@ function _M:drawDialog()
 	-- Add an empty Row
 	h = h + self.font_h + 4
 	
-	s:drawStringBlended(self.font, "Life     : "..(player.life), w, h, 255, 255, 255, true) h = h + self.font_h + 4
-	s:drawStringBlended(self.font, "Dreaming : "..(player.dreaming.dice), w, h, 255, 255, 255, true) h = h + self.font_h + 4
-	s:drawStringBlended(self.font, "Reason   : "..(player.reason.dice), w, h, 255, 255, 255, true) h = h + self.font_h + 4
-
-        
-    
+	s:drawStringBlended(self.font, ("Life     : %d/%d"):format(player.life, player.max_life), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, ("Dreaming : %d/%d"):format(player.dreaming, player.max_dreaming), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, ("Reason   : %d/%d"):format(player.reason, player.max_reason), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+         
     -- Starts a new Column
     h = 0
     w = self.w * 0.25 
 	
     -- Dice pools
-	local offense 	= player.offense
-	local defense 	= player.defense
-	local damage	= player.damage
-	local armor		= player.armor
-	
-	s:drawStringBlended(self.font, "Offense : "..(offense.dice).."d"..(offense.sides), w, h, 255, 255, 255, true) h = h + self.font_h + 4
-	s:drawStringBlended(self.font, "Defense : "..(defense.dice).."d"..(defense.sides), w, h, 255, 255, 255, true) h = h + self.font_h + 4
-	s:drawStringBlended(self.font, "Damage  : "..(damage.dice).."d"..(damage.sides), w, h, 255, 255, 255, true) h = h + self.font_h + 4
-	s:drawStringBlended(self.font, "Armor   : "..(armor.dice).."d"..(armor.sides), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, "Offense : "..(player:getOffense()).."d"..(player.offense_sides), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, "Defense : "..(player:getDefense()).."d"..(player.defense_sides), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, "Damage  : "..(player:getDamage()).."d"..(player.damage_sides), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, "Armor   : "..(player:getArmor()).."d"..(player.armor_sides), w, h, 255, 255, 255, true) h = h + self.font_h + 4
     
     self.c_desc:generate()
     self.changed = false

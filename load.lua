@@ -21,6 +21,8 @@
 local KeyBind = require "engine.KeyBind"
 local DamageType = require "engine.DamageType"
 local ActorInventory = require "engine.interface.ActorInventory"
+local ActorStats = require "engine.interface.ActorStats"
+local ActorResource = require "engine.interface.ActorResource"
 local ActorTalents = require "engine.interface.ActorTalents"
 local ActorAI = require "engine.interface.ActorAI"
 local ActorLevel = require "engine.interface.ActorLevel"
@@ -49,6 +51,16 @@ ActorInventory:defineInventory("OFFHAND", "Held or wielded in off hand", true, "
 ActorInventory:defineInventory("BODY", "Main armor", true, "Armor protects me from physical attacks. Heavier armor may slow me down.")
 ActorInventory:defineInventory("SHOOTER", "Shooter", true, "My ranged weapon.")
 ActorInventory:defineInventory("AMMO", "Ammo", true, "My readied ammo.")
+
+-- Actor stats
+ActorStats:defineStat("Offense","offense", 1, 1, 100, "Offense is my ability to land an attack.")
+ActorStats:defineStat("Defense","defense", 1, 1, 100, "Defense is my ability to avoid an attack.")
+ActorStats:defineStat("Damage",	"damage", 1, 1, 100, "Damage is my ability to kill things once I land an attack.  Generally this comes from my equipment rather than skill.")
+ActorStats:defineStat("Armor",	"armor", 1, 1, 100, "Armor is my ability to avoid damage once an attack has landed.  Generally this comes from my equipment rather than skill.")
+
+-- Actor Resources
+ActorResource:defineResource("Dreaming", "dreaming", nil, "dreaming_regen", "Dreaming represents my sense of wonder and imagination.  The higher it is the harder my fae magic will be to resist.")
+ActorResource:defineResource("Reason", "reason", nil, "reason_regen", "Reason represents my logic and higher thinking.  I use this to avoid fae magic and puzzle out problems.")
 
 -- Actor AIs
 ActorAI:loadDefinition("/engine/ai/")
