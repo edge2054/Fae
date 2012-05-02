@@ -48,18 +48,18 @@ module(..., package.seeall, class.inherit(
 
 function _M:init(t, no_default)
 	-- Stat and Resource modifiers
-	self.offense_sides
-	self.offense_target_modifier
-	self.defense_sides
-	self.defense_target_modifier
-	self.damage_sides
-	self.damage_target_modifier
-	self.armor_sides
-	self.armor_target_modifier
-	self.dreaming_sides
-	self.dreaming_target_modifier
-	self.reason_sides
-	self.reason_target_modifier
+	self.offense_sides = 10
+	self.offense_target_modifier = 0
+	self.defense_sides = 10
+	self.defense_target_modifier = 0
+	self.damage_sides = 10
+	self.damage_target_modifier = 0
+	self.armor_sides = 10
+	self.armor_target_modifier = 0
+	self.dreaming_sides = 10
+	self.dreaming_target_modifier = 0
+	self.reason_sides = 10
+	self.reason_target_modifier = 0
 	
 	-- Resources
 	t.max_dreaming = t.max_dreaming or 5

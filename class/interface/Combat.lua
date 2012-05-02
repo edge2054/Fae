@@ -50,12 +50,14 @@ function _M:attackTarget(target, mult)
 	local hit = false
 	local dam = 0
 	-- Do we hit?  Is it a crit?
-	local successes, crit = self:doOpposedTest(self, target, self.offense, target.defense)
+	local offense_pool = self:getCombatPool("offense")
+	local defense_pool = target:getCombatPool("defense")
+	local successes, crit = self:doOpposedTest(self, target, offense_pool, defense_pool)
 	-- If we hit we resolve damage
 	if successes >= 0 then
 		hit = true
-		local damage_pool = table.clone(self.damage)
-		local armor_pool = table.clone(target.armor)
+		local damage_pool = self:getCombatPool("damage")
+		local armor_pool = target:getCombatPool("armor")
 		-- Did we crit?  Bonus damage
 		if crit then
 			damage_pool.dice = damage_pool.dice + successes
@@ -78,6 +80,20 @@ function _M:attackTarget(target, mult)
 	self:useEnergy(game.energy_to_act)
 end
 
+-- Converts actor stats into a table to pass easily to other functions
+function _M:getCombatPool(stat)
+	local define_pool = {
+		offense		= {	dice = self:getOffense(),	sides = self.offense_sides,		modifier = self.offense_target_modifier,	},
+		defense		= {	dice = self:getDefense(),	sides = self.defense_sides,		modifier = self.defense_target_modifier,	},
+		armor		= {	dice = self:getArmor(),		sides = self.armor_sides,		modifier = self.armor_target_modifier, 		},
+		damage		= {	dice = self:getDamage(),	sides = self.damage_sides,		modifier = self.damage_target_modifier,		},
+		dreaming	= {	dice = self:getDreaming(),	sides = self.dreaming_sides,	modifier = self.dreaming_target_modifier,	}, 
+		reason		= {	dice = self:getReason(),	sides = self.reason_sides,		modifier = self.reason_target_modifier,		},
+	}
+	return define_pool[stat]
+end
+
+
 --- Dice Functions
 
 --- Basic Success Test
@@ -87,7 +103,7 @@ function _M:doSuccessTest(t)
 	local successes = 0
 	local dice = t.dice or 1
 	local sides = t.sides or 10
-	local target_number = t.base_target_number or 6
+	local target_number = 6 + (t.modifier or 0)
 --	print(("%s rolling %dd%d dice..."):format(self.name:capitalize(), t.dice, t.sides))
 	while dice > 0 and successes < t.dice do
 		local roll = rng.dice(1, sides)
