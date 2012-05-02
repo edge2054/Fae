@@ -25,9 +25,7 @@ require "engine.interface.ActorTemporaryEffects"
 require "engine.interface.ActorLife"
 require "engine.interface.ActorProject"
 require "engine.interface.ActorLevel"
-require "engine.interface.ActorStats"
 require "engine.interface.ActorTalents"
-require "engine.interface.ActorResource"
 require "engine.interface.ActorFOV"
 require "mod.class.interface.Combat"
 local Map = require "engine.Map"
@@ -39,27 +37,25 @@ module(..., package.seeall, class.inherit(
 	engine.interface.ActorLife,
 	engine.interface.ActorProject,
 	engine.interface.ActorLevel,
-	engine.interface.ActorStats,
 	engine.interface.ActorTalents,
-	engine.interface.ActorResource,
 	engine.interface.ActorFOV,
 	mod.class.interface.Combat
 ))
 
 function _M:init(t, no_default)
 	-- Define combat dice pools
-	self.offense = { dice = 1, sides = 10, base_target_number = 6 } 
-	self.defense = { dice = 1, sides = 10, base_target_number = 6 } 
-	self.damage  = { dice = 1, sides = 10, base_target_number = 6 } 
-	self.armor   = { dice = 1, sides = 10, base_target_number = 6 } 
+	self.offense  = { dice = 1, sides = 10, base_target_number = 6 } 
+	self.defense  = { dice = 1, sides = 10, base_target_number = 6 } 
+	self.damage   = { dice = 1, sides = 10, base_target_number = 6 } 
+	self.armor    = { dice = 1, sides = 10, base_target_number = 6 } 
 
+	-- Define Dreaming and Reason; our Resources
+	self.dreaming = { dice = 5, sides = 10, base_target_number = 6 }
+	self.reason   = { dice = 5, sides = 10, base_target_number = 6 } 
+	
 	-- Default regen
 	t.life_regen = t.life_regen or 0.1
 	t.life_regen_pool = t.life_regen_pool or 0
-	
-	-- Resources
-	t.max_reason = t.max_reason or 5
-	t.max_belief = t.max_belief or 5
 	
 	engine.Actor.init(self, t, no_default)
 	engine.interface.ActorInventory.init(self, t)
@@ -67,8 +63,6 @@ function _M:init(t, no_default)
 	engine.interface.ActorLife.init(self, t)
 	engine.interface.ActorProject.init(self, t)
 	engine.interface.ActorTalents.init(self, t)
-	engine.interface.ActorResource.init(self, t)
-	engine.interface.ActorStats.init(self, t)
 	engine.interface.ActorLevel.init(self, t)
 	engine.interface.ActorFOV.init(self, t)
 end
@@ -85,8 +79,6 @@ function _M:act()
 	if self.life < self.max_life and self.life_regen > 0 then
 		self:regenLife()
 	end
-	-- Regen Resources??  May remove this later
-	self:regenResources()
 	-- Compute timed effects
 	self:timedEffects()
 
@@ -108,8 +100,8 @@ function _M:move(x, y, force)
 end
 
 --- Regenerate life 
--- Life regen only ticks when the life_regen_pool is a whole number
--- This is mostly because I'm OCD and want whole numbers!!
+--  Life regen only ticks when the life_regen_pool is a whole number
+--  This is mostly because I'm OCD and want whole numbers!!
 function _M:regenLife()
 	-- Increase the pool size
 	self.life_regen_pool = self.life_regen_pool + self.life_regen
@@ -210,12 +202,12 @@ function _M:preUseTalent(ab, silent)
 	if not self:enoughEnergy() then print("fail energy") return false end
 
 	if ab.mode == "sustained" then
-		if ab.sustain_reason and self.max_reason < ab.sustain_reason and not self:isTalentActive(ab.id) then
+		if ab.sustain_reason then
 			game.logPlayer(self, "You do not have enough reason to activate %s.", ab.name)
 			return false
 		end
 	else
-		if ab.reason and self:getReason() < ab.reason then
+		if ab.dreaming then
 			game.logPlayer(self, "You do not have enough reason to cast %s.", ab.name)
 			return false
 		end
@@ -251,16 +243,16 @@ function _M:postUseTalent(ab, ret)
 	if ab.mode == "sustained" then
 		if not self:isTalentActive(ab.id) then
 			if ab.sustain_reason then
-				self.max_reason = self.max_reason - ab.sustain_reason
+
 			end
 		else
 			if ab.sustain_reason then
-				self.max_reason = self.max_reason + ab.sustain_reason
+
 			end
 		end
 	else
-		if ab.reason then
-			self:incReason(-ab.reason)
+		if ab.dreaming then
+
 		end
 	end
 
@@ -397,7 +389,7 @@ function _M:defineDisplayCallback()
 end
 
 --- Call when added to a level
--- Used to make escorts and such
+-- Ensures nothing bizzare happens from our life regen method and allows us to do neat things with NPCs
 function _M:addedToLevel(level, x, y)
 	if not self._rst_full then self:resetToFull() self._rst_full = true end -- Only do it once, the first time we come into being
 	self:check("on_added_to_level", level, x, y)

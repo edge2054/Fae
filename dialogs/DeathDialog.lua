@@ -80,8 +80,8 @@ function _M:cleanActor()
 	end
 end
 
---- Restore resources
-function _M:restoreResources()
+--- Restore life
+function _M:restoreLife()
 	self.actor.life = self.actor.max_life
 
 	self.actor.energy.value = game.energy_to_act
@@ -115,7 +115,7 @@ function _M:use(item)
 		game.logPlayer(self.actor, "#LIGHT_BLUE#You resurrect! CHEATER !")
 
 		self:cleanActor()
-		self:restoreResources()
+		self:restoreLife()
 		self:resurrectBasic()
 	end
 end

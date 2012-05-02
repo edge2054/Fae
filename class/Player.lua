@@ -282,16 +282,15 @@ local function spotHostiles(self)
 end
 
 --- Can we continue resting ?
--- We can rest if no hostiles are in sight, and if we need life/mana/stamina (and their regen rates allows them to fully regen)
+-- We can rest if no hostiles are in sight, and if we need life(and their regen rates allows them to fully regen)
 function _M:restCheck()
 	local spotted = spotHostiles(self)
 	if #spotted > 0 then return false, "hostile spotted" end
 
-	-- Check resources, make sure they CAN go up, otherwise we will never stop
-	if self:getReason() < self:getMaxReason() and self.reason_regen > 0 then return true end
+	-- Check life, make sure it CAN go up, otherwise we will never stop
 	if self.life < self.max_life and self.life_regen> 0 then return true end
 
-	return false, "all resources and life at maximum"
+	return false, "life at maximum"
 end
 
 --- Can we continue running?

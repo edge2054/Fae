@@ -28,15 +28,7 @@ newBirthDescriptor{
 		lite = 3,
 		life = 20,
 		max_life = 20,
-		belief = 2,
-		reason = 3,
 	},
-	talents = {
-		-- For easy testing; remove later
-		[ActorTalents.T_KICK] = 1,
-		[ActorTalents.T_ACID_SPRAY] = 1,
-	},
-	
 	body = { INVEN = 10, MAINHAND = 1, OFFHAND = 1, BODY = 1, SHOOTER = 1, AMMO = 1},
 }
 
@@ -46,6 +38,11 @@ newBirthDescriptor{
 	desc =	{
 		"While exploring some old trails I stumbled upon an area of forest unlike anything I would have ever imagined",
 	},
+	talents = {
+		-- For easy testing; remove later
+		[ActorTalents.T_KICK] = 1,
+		[ActorTalents.T_ACID_SPRAY] = 1,
+	},
 }
 
 newBirthDescriptor{
@@ -53,8 +50,11 @@ newBirthDescriptor{
 	name = "Hippie",
 	desc =	{
 		"What a strange trip this has been",
-		
-		"#GOLD#The hippie"
+	},
+	talents = {
+		-- For easy testing; remove later
+		[ActorTalents.T_KICK] = 1,
+		[ActorTalents.T_ACID_SPRAY] = 1,
 	},
 }
 
@@ -63,5 +63,10 @@ newBirthDescriptor{
 	name = "Hunter",
 	desc =	{
 		"These woods look old and untouched, I can only imagine the game I might find back here.",
+	},
+	talents = {
+		-- For easy testing; remove later
+		[ActorTalents.T_KICK] = 1,
+		[ActorTalents.T_ACID_SPRAY] = 1,
 	},
 }

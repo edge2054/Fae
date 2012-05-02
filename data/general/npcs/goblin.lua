@@ -26,6 +26,7 @@ newEntity{
 	desc = [[Ugly and green!]],
 
 	ai = "dumb_talented_simple", ai_state = { talent_in=3, },
+	offense = { dice = 4 }
 	
 }
 
@@ -34,6 +35,7 @@ newEntity{ base = "BASE_NPC_goblin",
 	level_range = {1, 4}, exp_worth = 1,
 	rarity = 4,
 	max_life = resolvers.rngavg(5,9),
+	offense = { dice = 2}
 }
 
 newEntity{ base = "BASE_NPC_goblin",
@@ -41,4 +43,5 @@ newEntity{ base = "BASE_NPC_goblin",
 	level_range = {6, 10}, exp_worth = 1,
 	rarity = 4,
 	max_life = resolvers.rngavg(10,12),
+	offense = { dice = 6}
 }

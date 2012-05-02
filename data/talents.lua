@@ -74,5 +74,6 @@ newTalent{
 	end,
 }
 
-load("/data/talents/belief/base.lua")
+load("/data/talents/dreaming/base.lua")
+load("/data/talents/reason/base.lua")
 

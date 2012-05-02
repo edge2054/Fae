@@ -22,7 +22,6 @@ require "engine.class"
 local Dialog = require "engine.ui.Dialog"
 local Talents = require "engine.interface.ActorTalents"
 local SurfaceZone = require "engine.ui.SurfaceZone"
-local Stats = require "engine.interface.ActorStats"
 local Textzone = require "engine.ui.Textzone"
 
 module(..., package.seeall, class.inherit(Dialog))
@@ -57,15 +56,19 @@ function _M:drawDialog()
 
     h = 0
     w = 0
-    s:drawStringBlended(self.font, "Name   : "..(player.name or "Unnamed"), w, h, 255, 255, 255, true) h = h + self.font_h + 4
-	s:drawStringBlended(self.font, "Role   : "..(player.descriptor.role), w, h, 255, 255, 255, true) h = h + self.font_h + 4
-	s:drawStringBlended(self.font, "Life   : "..(player.life), w, h, 255, 255, 255, true) h = h + self.font_h + 4
-	s:drawStringBlended(self.font, "Belief : "..(player.belief), w, h, 255, 255, 255, true) h = h + self.font_h + 4
-	s:drawStringBlended(self.font, "Reason : "..(player.reason), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+    s:drawStringBlended(self.font, "Name     : "..(player.name or "Unnamed"), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, "Role     : "..(player.descriptor.role), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	
+	-- Add an empty Row
+	h = h + self.font_h + 4
+	
+	s:drawStringBlended(self.font, "Life     : "..(player.life), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, "Dreaming : "..(player.dreaming.dice), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, "Reason   : "..(player.reason.dice), w, h, 255, 255, 255, true) h = h + self.font_h + 4
 
         
-    h = h + self.font_h + 4 -- Adds an empty row
     
+    -- Starts a new Column
     h = 0
     w = self.w * 0.25 
 	

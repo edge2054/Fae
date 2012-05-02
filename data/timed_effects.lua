@@ -17,7 +17,9 @@
 -- Eric Wykoff "edge2054"
 -- edge2054@gmail.com
 
-local Stats = require "engine.interface.ActorStats"
+load("/data/timed-effects/dreaming.lua")
+load("/data/timed-effects/reason.lua")
+load("/data/timed-effects/misc.lua")
 
 newEffect{
 	name = "ACIDBURN",

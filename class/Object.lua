@@ -21,7 +21,6 @@ require "engine.class"
 require "engine.Object"
 require "engine.interface.ObjectActivable"
 
-local Stats = require("engine.interface.ActorStats")
 local Talents = require("engine.interface.ActorTalents")
 local DamageType = require("engine.DamageType")
 

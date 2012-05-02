@@ -120,6 +120,7 @@ function _M:newGame()
 		self.paused = true
 		self.creating_player = false
 		print("[PLAYER BIRTH] resolved!")
+		self.player.changed = true
 	end)
 	self:registerDialog(birth)
 end
@@ -176,7 +177,7 @@ end
 function _M:getSaveDescription()
 	return {
 		name = self.player.name,
-		description = ([[Exploring level %d of %s.]]):format(self.level.level, self.zone.name),
+		description = ([[%s the %s is exploring %s.]]):format(game.player.name, game.player.descriptor.role, self.zone.name),
 	}
 end
 
@@ -489,6 +490,7 @@ function _M:setupCommands()
 				"resume",
 				"keybinds",
 				"video",
+				"sound",
 				"save",
 				"quit"
 			}
