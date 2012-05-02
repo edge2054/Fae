@@ -159,12 +159,6 @@ function _M:getDesc(name_param)
 		desc:add(true)
 		desc:add({"color", "WHITE"})
 
-	local reqs = self:getRequirementDesc(game.player)
-	if reqs then
-		desc:add(true)
-		desc:merge(reqs)
-	end
-
 	desc:add(true, true)
 	desc:merge(self:getTextualDesc())
 

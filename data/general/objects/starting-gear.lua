@@ -17,4 +17,4 @@
 -- Eric Wykoff "edge2054"
 -- edge2054@gmail.com
 
-load("/data/general/objects/base.lua")
+

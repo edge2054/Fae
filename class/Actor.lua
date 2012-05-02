@@ -44,14 +44,14 @@ module(..., package.seeall, class.inherit(
 
 function _M:init(t, no_default)
 	-- Define combat dice pools
-	self.offense  = { dice = 1, sides = 10, base_target_number = 6 } 
-	self.defense  = { dice = 1, sides = 10, base_target_number = 6 } 
-	self.damage   = { dice = 1, sides = 10, base_target_number = 6 } 
-	self.armor    = { dice = 1, sides = 10, base_target_number = 6 } 
+	t.offense  = { dice = 1, sides = 10, base_target_number = 6 } 
+	t.defense  = { dice = 1, sides = 10, base_target_number = 6 } 
+	t.damage   = { dice = 1, sides = 10, base_target_number = 6 } 
+	t.armor    = { dice = 1, sides = 10, base_target_number = 6 } 
 
 	-- Define Dreaming and Reason; our Resources
-	self.dreaming = { dice = 5, sides = 10, base_target_number = 6 }
-	self.reason   = { dice = 5, sides = 10, base_target_number = 6 } 
+	t.dreaming = { dice = 5, sides = 10, base_target_number = 6 }
+	t.reason   = { dice = 5, sides = 10, base_target_number = 6 } 
 	
 	-- Default regen
 	t.life_regen = t.life_regen or 0.1

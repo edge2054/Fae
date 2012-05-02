@@ -34,6 +34,9 @@ KeyBind:load("move,hotkeys,inventory,actions,interface,debug")
 -- Damage types
 DamageType:loadDefinition("/data/damage_types.lua")
 
+-- Additional entities resolvers
+dofile("/mod/resolvers.lua")
+
 -- Talents
 ActorTalents:loadDefinition("/data/talents.lua")
 
@@ -61,9 +64,6 @@ core.fov.set_algorithm("hex")
 
 -- Wall-sliding
 config.settings.player_slide = true
-
--- Additional entities resolvers
-dofile("/mod/resolvers.lua")
 
 -- Makes ASCII on ASCII work somehow.  Just doing what DarkGod told me to do.... (and copying what Darren did :P)
 Map.updateMapDisplay = function (self, x, y, mos)

@@ -17,19 +17,19 @@
 -- Eric Wykoff "edge2054"
 -- edge2054@gmail.com
 
+
 newBirthDescriptor{
 	type = "base",
 	name = "base",
 	desc =	{
 		"I find myself lost.  A stranger in a strange land.  My only hope is to press forward and find a way home.",
 	},
-		
+	body = { INVEN = 10, MAINHAND = 1, OFFHAND = 1, BODY = 1, SHOOTER = 1, AMMO = 1},
 	copy = {
 		lite = 3,
 		life = 20,
 		max_life = 20,
 	},
-	body = { INVEN = 10, MAINHAND = 1, OFFHAND = 1, BODY = 1, SHOOTER = 1, AMMO = 1},
 }
 
 newBirthDescriptor{
@@ -42,6 +42,10 @@ newBirthDescriptor{
 		-- For easy testing; remove later
 		[ActorTalents.T_KICK] = 1,
 		[ActorTalents.T_ACID_SPRAY] = 1,
+	},
+	
+	copy= {
+
 	},
 }
 
@@ -60,13 +64,15 @@ newBirthDescriptor{
 
 newBirthDescriptor{
 	type = "role",
-	name = "Hunter",
+	name = "Park Ranger",
 	desc =	{
-		"These woods look old and untouched, I can only imagine the game I might find back here.",
 	},
 	talents = {
 		-- For easy testing; remove later
 		[ActorTalents.T_KICK] = 1,
 		[ActorTalents.T_ACID_SPRAY] = 1,
+	},
+	copy = {
+		resolvers.equip{ {type="weapon", subtype="battleaxe", name="iron battleaxe"} },
 	},
 }

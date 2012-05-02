@@ -19,13 +19,13 @@
 
 
 -- These are place holders and need to be re-written
---[=[newEntity{
+newEntity{
     define_as = "BASE_BATTLEAXE",
     slot = "MAINHAND",
     slot_forbid = "OFFHAND",
     type = "weapon", subtype="battleaxe",
     display = "/", color=colors.SLATE,
-    encumber = 3,
+  --  encumber = 3,
     rarity = 3,
     name = "a generic battleaxe",
     desc = [[t4modules massive two-handed battleaxes.]],
@@ -57,11 +57,13 @@ newEntity{
 	base = "BASE_BATTLEAXE",
     name = "iron battleaxe",
     level_range = {1, 10},
-    require = { stat = { str=10 }, },
     cost = 5,
     combat = {
         dam = 10,
     },
+	wielder = {
+		offense = { dice = 10},
+	},
 }
 
 newEntity{
@@ -84,4 +86,4 @@ newEntity{
 	combat = {
 		dam = 10,
 	},
-}]=]
+}
