@@ -67,7 +67,7 @@ function _M:run()
 	-- UI
 	self.player_display = PlayerDisplay.new(10, 0, self.w, self.h)
 	self.logdisplay = LogDisplay.new(0, self.h * 0.8, self.w * 0.5, self.h * 0.2, nil, nil, nil, {255,255,255}, {30,30,30})
-	self.hotkeys_display_icons = HotkeysIconsDisplay.new(nil, self.w *0.01, self.h * 0.93, self.w, 0, {255,255,255}, "/data/font/DroidSansMono.ttf", 10, game.h * 0.06, game.h * 0.06)
+	self.hotkeys_display_icons = HotkeysIconsDisplay.new(nil, self.w *0.01, self.h * 0.91, self.w, 0, {255,255,255}, "/data/font/DroidSansMono.ttf", 10, game.h * 0.07, game.h * 0.07)
 	self.hotkeys_display_icons:enableShadow(0.6)
 	self.tooltip = Tooltip.new(nil, nil, {255,255,255}, {30,30,30})
 
@@ -131,7 +131,7 @@ function _M:loaded()
 	Map:setViewerActor(self.player)
 	local th = 48
 	local tw = math.floor(math.sqrt(0.75) * (th + 0.5))
-	Map:setViewPort(0, 0, self.w, self.h * 0.8, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
+	Map:setViewPort(0, 0, self.w, self.h * 0.90, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
 	engine.interface.GameMusic.loaded(self)
 	engine.interface.GameSound.loaded(self)
 	self:playMusic()
@@ -142,7 +142,7 @@ function _M:setupDisplayMode()
 --	print("[DISPLAY MODE] 32x32 ASCII/background")
 	local th = 48
 	local tw = math.floor(math.sqrt(0.75) * (th + 0.5))
-	Map:setViewPort(0, 0, self.w, self.h * 0.8, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
+	Map:setViewPort(0, 0, self.w, self.h * 0.90, tw, th, "/data/font/DroidSansMono.ttf", 48, true)
 	Map:resetTiles()
 	Map.tiles.use_images = true
 
@@ -304,7 +304,7 @@ function _M:display(nb_keyframe)
 	end
 
 	-- We display the player's interface
-	self.ui_texture_bar[1]:toScreen(0, self.h * 0.92, self.w * 1.5, self.h * 0.12)
+	self.ui_texture_bar[1]:toScreen(0, self.h * 0.9, self.w * 1.5, self.h * 0.15)
 	self.player_display:toScreen(nb_keyframe)
 	self.hotkeys_display_icons:toScreen()
 	
@@ -537,12 +537,12 @@ function _M:setupMouse(reset)
 		self.player:mouseHandleDefault(self.key, self.key == self.normal_key, button, mx, my, xrel, yrel, event)
 	end)
 	-- Scroll message log
-	self.mouse:registerZone(self.logdisplay.display_x, self.logdisplay.display_y, self.w, self.h, function(button)
+--[[	self.mouse:registerZone(self.logdisplay.display_x, self.logdisplay.display_y, self.w * 0.2, self.h * 0.2, function(button)
 		if button == "wheelup" then self.logdisplay:scrollUp(1) end
 		if button == "wheeldown" then self.logdisplay:scrollUp(-1) end
-	end, {button=true})
+	end, {button=true})]]
 	-- Use hotkeys with mouse
-	self.mouse:registerZone(self.hotkeys_display_icons.display_x, self.hotkeys_display_icons.display_y, self.w, self.h, function(button, mx, my, xrel, yrel, bx, by, event)
+	self.mouse:registerZone(self.hotkeys_display_icons.display_x, self.hotkeys_display_icons.display_y, self.w, self.h * 0.1, function(button, mx, my, xrel, yrel, bx, by, event)
 		self.hotkeys_display_icons:onMouse(button, mx, my, event == "button", function(text) self.tooltip:displayAtMap(nil, nil, self.w, self.h, tostring(text)) end)
 	end)
 	self.mouse:setCurrent()
