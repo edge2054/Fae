@@ -44,6 +44,8 @@ local DebugConsole = require "engine.DebugConsole"
 local FlyingText = require "engine.FlyingText"
 local Tooltip = require "mod.class.Tooltip"
 
+local Dialog = require "engine.ui.Dialog"
+
 local QuitDialog = require "mod.dialogs.Quit"
 
 module(..., package.seeall, class.inherit(engine.GameTurnBased, engine.interface.GameMusic, engine.interface.GameSound, engine.interface.GameTargeting))
@@ -120,9 +122,28 @@ function _M:newGame()
 		self.paused = true
 		self.creating_player = false
 		print("[PLAYER BIRTH] resolved!")
+		self:registerBirthProfile()
 		self.player.changed = true
 	end)
 	self:registerDialog(birth)
+	self:saveGame()
+end
+
+function _M:registerBirthProfile()
+	local birth_profile = game:registerDialog(require('engine.dialogs.GetText').new("Please enter a name for this save profile", "Save Profile", 2, 25, function(text)
+		local savename = text:gsub("[^a-zA-Z0-9_-.]", "_")
+		if fs.exists(("/%s/save/%s/game.teag"):format(self.__mod_info.short_name, savename)) then
+			Dialog:yesnoPopup("Overwrite profile?", "There is already a game saved with this profile name, do you want to overwrite it?", function(ret)
+				if not ret then
+					self:setPlayerName(text)
+				else 
+					return self:registerBirthProfile()
+				end
+			end, "No", "Yes")
+		else
+			self:setPlayerName(text)
+		end
+	end))
 end
 
 function _M:loaded()
@@ -176,8 +197,8 @@ end
 
 function _M:getSaveDescription()
 	return {
-		name = self.player.name,
-		description = ([[%s the %s is exploring %s.]]):format(game.player.name, game.player.descriptor.role, self.zone.name),
+		name = self.player_name,
+		description = ([[%s the level %s %s is exploring %s.]]):format(game.player.name, game.player.level, game.player.descriptor.role, self.zone.name),
 	}
 end
 
