@@ -126,7 +126,7 @@ function _M:newGame()
 		self.player.changed = true
 	end)
 	self:registerDialog(birth)
-	self:saveGame()
+--	self:saveGame()
 end
 
 function _M:registerBirthProfile()
@@ -144,7 +144,13 @@ function _M:registerBirthProfile()
 			self:setPlayerName(text)
 		end
 		end, function()
-			util.showMainMenu()
+			Dialog:yesnoPopup("Quit to main menu?", "Really exit to main menu?", function(ret)
+				if not ret then
+					util.showMainMenu()
+				else 
+					return self:registerBirthProfile()
+				end
+			end, "No", "Yes")
 		end)
 	)
 end
