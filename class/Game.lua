@@ -114,7 +114,6 @@ function _M:newGame()
 
 	self.creating_player = true
 	local birth = Birther.new(nil, self.player, {"base", "role"}, function()
-		self:registerBirthProfile()
 		self:changeLevel(1, "dungeon")
 		print("[PLAYER BIRTH] resolve...")
 		self.player:resolve()
@@ -124,11 +123,13 @@ function _M:newGame()
 		self.creating_player = false
 		print("[PLAYER BIRTH] resolved!")
 		self.player.changed = true
+		self:registerBirthProfile()
 	end)
 	self:registerDialog(birth)
---	self:saveGame()
 end
 
+-- All of this is to avoid rewriting the birth dialog and to give the player's save game a unique name
+-- Thus allowing multiple save files without letting the player select the character name
 function _M:registerBirthProfile()
 	local birth_profile = game:registerDialog(require('engine.dialogs.GetText').new("Please enter a name for this save profile", "Save Profile", 2, 25, function(text)
 		local savename = text:gsub("[^a-zA-Z0-9_-.]", "_")
@@ -136,12 +137,14 @@ function _M:registerBirthProfile()
 			Dialog:yesnoPopup("Overwrite profile?", "There is already a game saved with this profile name, do you want to overwrite it?", function(ret)
 				if not ret then
 					self:setPlayerName(text)
+					self:saveGame()
 				else 
 					return self:registerBirthProfile()
 				end
 			end, "No", "Yes")
 		else
 			self:setPlayerName(text)
+			self:saveGame()
 		end
 		end, function()
 			Dialog:yesnoPopup("Quit to main menu?", "Really exit to main menu?", function(ret)
