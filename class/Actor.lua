@@ -47,7 +47,7 @@ module(..., package.seeall, class.inherit(
 ))
 
 function _M:init(t, no_default)
-	-- Stat and Resource modifiers
+	-- Stat and Resource dice sides and target modifiers
 	self.offense_sides = 10
 	self.offense_target_modifier = 0
 	self.defense_sides = 10

@@ -50,14 +50,14 @@ function _M:attackTarget(target, mult)
 	local hit = false
 	local dam = 0
 	-- Do we hit?  Is it a crit?
-	local offense_pool = self:getCombatPool("offense")
-	local defense_pool = target:getCombatPool("defense")
+	local offense_pool = self:getDicePool("offense")
+	local defense_pool = target:getDicePool("defense")
 	local successes, crit = self:doOpposedTest(self, target, offense_pool, defense_pool)
 	-- If we hit we resolve damage
 	if successes >= 0 then
 		hit = true
-		local damage_pool = self:getCombatPool("damage")
-		local armor_pool = target:getCombatPool("armor")
+		local damage_pool = self:getDicePool("damage")
+		local armor_pool = target:getDicePool("armor")
 		-- Did we crit?  Bonus damage
 		if crit then
 			damage_pool.dice = damage_pool.dice + successes
@@ -81,7 +81,7 @@ function _M:attackTarget(target, mult)
 end
 
 -- Converts actor stats into a table to pass easily to other functions
-function _M:getCombatPool(stat)
+function _M:getDicePool(stat)
 	local define_pool = {
 		offense		= {	dice = self:getOffense(),	sides = self.offense_sides,		modifier = self.offense_target_modifier,	},
 		defense		= {	dice = self:getDefense(),	sides = self.defense_sides,		modifier = self.defense_target_modifier,	},
@@ -93,9 +93,7 @@ function _M:getCombatPool(stat)
 	return define_pool[stat]
 end
 
-
 --- Dice Functions
-
 --- Basic Success Test
 --  Returns a number of successes based on how many dice equal or exceed the target number
 -- 	Dice that roll 10 or higher are rolled again, potentially producing more successes but no more then the base pool size
