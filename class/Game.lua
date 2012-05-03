@@ -114,6 +114,7 @@ function _M:newGame()
 
 	self.creating_player = true
 	local birth = Birther.new(nil, self.player, {"base", "role"}, function()
+		self:registerBirthProfile()
 		self:changeLevel(1, "dungeon")
 		print("[PLAYER BIRTH] resolve...")
 		self.player:resolve()
@@ -122,7 +123,6 @@ function _M:newGame()
 		self.paused = true
 		self.creating_player = false
 		print("[PLAYER BIRTH] resolved!")
-		self:registerBirthProfile()
 		self.player.changed = true
 	end)
 	self:registerDialog(birth)
@@ -143,7 +143,10 @@ function _M:registerBirthProfile()
 		else
 			self:setPlayerName(text)
 		end
-	end))
+		end, function()
+			util.showMainMenu()
+		end)
+	)
 end
 
 function _M:loaded()
