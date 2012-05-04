@@ -41,6 +41,7 @@ newEntity{
 	clip_size = 13,
 	range_fall_off = 10,
 	combat = {
-		damage = 10,
+		offense_bonus = 5, -- guns are hard to dodge and increase offense by 5 on their attacks
+		damage = 10, -- gun damage is an over write not a bonus to base damage
 	}
 }

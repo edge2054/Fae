@@ -21,8 +21,8 @@
 -- These are place holders and need to be re-written
 newEntity{
     define_as = "BASE_BATTLEAXE",
-    slot = "MAINHAND",
-    slot_forbid = "OFFHAND",
+    slot = "MAINHAND", offslot = "OFFHAND",
+    --slot_forbid = "OFFHAND",
     type = "weapon", subtype="battleaxe",
     display = "/", color=colors.SLATE,
   --  encumber = 3,
@@ -59,7 +59,8 @@ newEntity{
     level_range = {1, 10},
     cost = 5,
     combat = {
-
+		offense_bonus = 4,
+		damage = 4,
     },
 	wielder = {
 

@@ -23,8 +23,18 @@ local Map = require "engine.Map"
 local Target = require "engine.Target"
 local Talents = require "engine.interface.ActorTalents"
 
---- Interface to add ToME combat system
+--- Interface to add combat system
 module(..., package.seeall, class.make)
+
+--[[Fae Combat System
+	Fae's combat system revolves around successes.  Virtually everything is an oppossed roll between the attacker and the targets dice pools.
+	Primarily Offense vs. Defense, Damage vs. Armor, and Dreaming vs. Reason.
+	Offense vs. Defense can crit if the number of successes are greater then the defense pool resulting in extra dice being added to the Damage vs. Armor check.
+	Dice that roll 10 or higher also explode, being rolled once more and adding to the success total (up to a maximum number of successes equal to the pool size).
+	In order to bias the game towards combat resolution oppossed rolls which result in a tie (0 net successes) will fudge the roll and return 1 success.
+	Generally dice are rolled as pool size d10 against a target of 6 but these numbers can be modified.
+	Take care though, lowering target numbers or increasing die size is generally better then increasing number of dice and balance should be taken into consideration.
+]]
 
 --- Checks what to do with the target
 --  Talk ? attack ? displace ?
@@ -44,99 +54,77 @@ function _M:bumpInto(target)
 	end
 end
 
---- Makes the death happen!
-function _M:attackTarget(target, mult)
+-- Attack with all available weapons
+function _M:attackTarget(target, no_energy)
+	local successes, dam
+	local mainhand, offhand
+	-- Kinda sloppy but we pass the string and recall getWeaponFromSlot later instead of passing the whole weapon
+	-- This is so we can ask later if the weapon is in the offhand without passing another argument
+	if self:getWeaponFromSlot("MAINHAND") then
+		successes, crit, dam = self:attackTargetWith(target, "MAINHAND")
+		mainhand = true
+	end
+	if self:getWeaponFromSlot("OFFHAND") then
+		successes, crit, dam = self:attackTargetWith(target, "OFFHAND")
+		offhand = true
+	end
+	-- If we didn't attack with a mainhand or offhand weapon we can always do an unarmed attack
+	-- Even if our hands are full (at least for now)
+	if not (mainhand or offhand) then
+		successes, crit, dam = self:attackTargetWith(target)
+	end
+	
+	if not no_energy then
+		self:useEnergy(game.energy_to_act)
+	end
+	return successes, crit, dam
+end
+
+-- Attack with one weapon
+function _M:attackTargetWith(target, weapon_slot)
 	-- Set some variables for our flyers
-	local hit = false
 	local dam = 0
 	-- Do we hit?  Is it a crit?
-	local offense_pool = self:getDicePool("offense")
-	local defense_pool = target:getDicePool("defense")
+	local offense_pool, defense_pool = self:getDicePool("offense", weapon_slot), target:getDicePool("defense")
 	local successes, crit = self:doOpposedTest(self, target, offense_pool, defense_pool)
 	-- If we hit we resolve damage
 	if successes >= 0 then
-		hit = true
-		local damage_pool = self:getDicePool("damage")
-		local armor_pool = target:getDicePool("armor")
+		local damage_pool, armor_pool = self:getDicePool("damage", weapon_slot), target:getDicePool("armor")
 		-- Did we crit?  Bonus damage
 		if crit then
 			damage_pool.dice = damage_pool.dice + successes
 		end
-		-- Get the damage
+		-- Get the damage as a number
 		dam = self:doOpposedTest(self, target, damage_pool, armor_pool)
 		-- And apply it
 		if dam > 0 then
-			DamageType:get(DamageType.PHYSICAL).projector(self, target.x, target.y, DamageType.PHYSICAL, math.max(0, dam), crit)
+			DamageType:get(DamageType.PHYSICAL).projector(self, target.x, target.y, DamageType.PHYSICAL, dam, crit)
 		end
 	end
 	
 	-- Now do our  flyers!!
 	-- We only call this if the damage is over 0, otherwise the projector handles it
 	if dam == 0 then
-		self:doCombatFlyers(self, target, hit)
+		self:doCombatFlyers(target, successes)
 	end
 
 	-- We use up our own energy
-	self:useEnergy(game.energy_to_act)
+--	self:useEnergy(game.energy_to_act)
+	return successes, crit, dam
 end
 
 -- Converts actor stats into a table to pass easily to other functions
-function _M:getDicePool(stat)
+function _M:getDicePool(stat, weapon_slot)
 	local define_pool = {
 		-- Get Combat Modified Stats; these functions return table values
-		offense		=	self:getCombatOffense(),
+		offense		=	self:getCombatOffense(weapon_slot),
 		defense		=	self:getCombatDefense(),
 		armor		= 	self:getCombatArmor(),
-		damage		=	self:getCombatDamage(),
+		damage		=	self:getCombatDamage(weapon_slot),
 		dreaming	= 	self:getCombatDreaming(), 
 		reason		=	self:getCombatReason(),
 	}
 	return define_pool[stat]
-end
-
--- Combat Modified stat calls
--- All dynamic modifiers to combat pools should be applied here
-function _M:getCombatOffense()
-	local dice = self:getOffense()
-	local sides = self.offense_sides
-	local modifier = self.offense_target_modifier
-	local pack_table = {dice = dice, sides = sides, modifier = modifier}
-	return pack_table
-end
-function _M:getCombatDefense()
-	local dice = self:getDefense()
-	local sides = self.defense_sides
-	local modifier = self.defense_target_modifier
-	local pack_table = {dice = dice, sides = sides, modifier = modifier}
-	return pack_table
-end
-function _M:getCombatArmor()
-	local dice = self:getArmor()
-	local sides = self.armor_sides
-	local modifier = self.armor_target_modifier
-	local pack_table = {dice = dice, sides = sides, modifier = modifier}
-	return pack_table
-end
-function _M:getCombatDamage()
-	local dice = self:getDamage()
-	local sides = self.damage_sides
-	local modifier = self.damage_target_modifier
-	local pack_table = {dice = dice, sides = sides, modifier = modifier}
-	return pack_table
-end
-function _M:getCombatDreaming()
-	local dice = self:getDreaming()
-	local sides = self.dreaming_sides
-	local modifier = self.dreaming_target_modifier
-	local pack_table = {dice = dice, sides = sides, modifier = modifier}
-	return pack_table
-end
-function _M:getCombatReason()
-	local dice = self:getReason()
-	local sides = self.reason_sides
-	local modifier = self.reason_target_modifier
-	local pack_table = {dice = dice, sides = sides, modifier = modifier}
-	return pack_table
 end
 
 --- Dice Functions
@@ -170,7 +158,7 @@ end
 --- Oppossed Success Test
 --  Rolls attacker's and target's dice pools
 --  Returns net attacker successes and crit (when attacker's net successes exceed the target's pool)
-function _M:doOpposedTest(self, target, self_pool, target_pool)
+function _M:doOpposedTest(self, target, self_pool, target_pool, get_negative)
 	local self_successes = self:doSuccessTest(self_pool)
 	local target_successes = target:doSuccessTest(target_pool)
 	local net_successes = self_successes - target_successes
@@ -187,6 +175,12 @@ function _M:doOpposedTest(self, target, self_pool, target_pool)
 		crit = true
 	end
 	
+	-- ensures we only return positive values or 0
+	-- if we need a negative we'll have to pass the method the get_negative argument
+	if not get_negative then
+		net_successes = math.max(0, net_successes)
+	end
+	
 	return net_successes, crit
 end
 
@@ -197,11 +191,120 @@ function _M:doTotalDiceRoll(pool)
 	return rng.dice(pool.dice, pool.sides)
 end
 
+-- Gets a weapon from a slot, takes a string and returns the weapon table
+function _M:getWeaponFromSlot(weapon_slot)
+	if not weapon_slot or not self:getInven(weapon_slot) then return end
+	local weapon = self:getInven(weapon_slot)[1]
+	if not weapon or not weapon.combat then
+		return nil
+	end
+	return weapon
+end
+
+-- Combat Modified stat calls; returns a table
+-- Most combat modifiers should be calculated here.
+-- Offense
+function _M:getCombatOffense(weapon_slot)
+	-- Base values
+	local dice = self:getOffense()
+	local sides = self.offense_sides
+	local modifier = self.offense_target_modifier
+	
+	-- Using a weapon?
+	local weapon = self:getWeaponFromSlot(weapon_slot)
+	
+	-- Weapon modifiers
+	if weapon then
+		weapon = weapon.combat
+		if weapon.offense_bonus then
+			dice = dice + weapon.offense_bonus
+		elseif weapon.offense then
+			dice = weapon.offense
+		end
+	end
+	
+	local pack_table = {dice = dice, sides = sides, modifier = modifier}
+	return pack_table
+end
+
+-- Defense
+function _M:getCombatDefense()
+	-- Base values
+	local dice = self:getDefense()
+	local sides = self.defense_sides
+	local modifier = self.defense_target_modifier
+	
+	local pack_table = {dice = dice, sides = sides, modifier = modifier}
+	return pack_table
+end
+
+--Armor
+function _M:getCombatArmor()
+	-- Base values
+	local dice = self:getArmor()
+	local sides = self.armor_sides
+	local modifier = self.armor_target_modifier
+	
+	local pack_table = {dice = dice, sides = sides, modifier = modifier}
+	return pack_table
+end
+
+-- Damage
+function _M:getCombatDamage(weapon_slot)
+	-- Base values
+	local dice = self:getDamage()
+	local sides = self.damage_sides
+	local modifier = self.damage_target_modifier
+	
+	-- Using a weapon?
+	local weapon = self:getWeaponFromSlot(weapon_slot)
+	
+	-- Weapon modifiers
+	if weapon then
+		weapon = weapon.combat
+		-- some weapons, like swords, add to the base damage value
+		if weapon.damage_bonus then
+			dice = dice + weapon.damage_bonus
+		-- some weapons, like guns, over write the base damage value
+		elseif weapon.damage then
+			dice = weapon.damage
+		end
+	-- Unarmed damage bonus?  Used for claws and what not
+	elseif self:attr("unarmed_damage_bonus") then
+		dice = dice + self:attr("unarmed_damage_bonus")
+	end
+	
+	local pack_table = {dice = dice, sides = sides, modifier = modifier}
+	return pack_table
+end
+
+-- Dreaming
+function _M:getCombatDreaming()
+	-- Base values
+	local dice = self:getDreaming()
+	local sides = self.dreaming_sides
+	local modifier = self.dreaming_target_modifier
+	
+	local pack_table = {dice = dice, sides = sides, modifier = modifier}
+	return pack_table
+end
+
+-- Reason
+function _M:getCombatReason()
+	-- Base values
+	local dice = self:getReason()
+	local sides = self.reason_sides
+	local modifier = self.reason_target_modifier
+	
+	local pack_table = {dice = dice, sides = sides, modifier = modifier}
+	return pack_table
+end
+
 --- Combat Flyers; produces varying flyers based on combat results
 --  This does not do damage flyers; those are done in damage_types.lua
-function _M:doCombatFlyers(self, target, hit)
+function _M:doCombatFlyers(target, successes)
 	local sx, sy = game.level.map:getTileToScreen(target.x, target.y)
-	if hit then
+	if successes > 0  then
 		if self == game.player then
 			game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, "Soaked...", {255,0,255})
 			game.logSeen(target, "%s soaked my attack.", target.name:capitalize())
