@@ -83,14 +83,60 @@ end
 -- Converts actor stats into a table to pass easily to other functions
 function _M:getDicePool(stat)
 	local define_pool = {
-		offense		= {	dice = self:getOffense(),	sides = self.offense_sides,		modifier = self.offense_target_modifier,	},
-		defense		= {	dice = self:getDefense(),	sides = self.defense_sides,		modifier = self.defense_target_modifier,	},
-		armor		= {	dice = self:getArmor(),		sides = self.armor_sides,		modifier = self.armor_target_modifier, 		},
-		damage		= {	dice = self:getDamage(),	sides = self.damage_sides,		modifier = self.damage_target_modifier,		},
-		dreaming	= {	dice = self:getDreaming(),	sides = self.dreaming_sides,	modifier = self.dreaming_target_modifier,	}, 
-		reason		= {	dice = self:getReason(),	sides = self.reason_sides,		modifier = self.reason_target_modifier,		},
+		-- Get Combat Modified Stats; these functions return table values
+		offense		=	self:getCombatOffense(),
+		defense		=	self:getCombatDefense(),
+		armor		= 	self:getCombatArmor(),
+		damage		=	self:getCombatDamage(),
+		dreaming	= 	self:getCombatDreaming(), 
+		reason		=	self:getCombatReason(),
 	}
 	return define_pool[stat]
+end
+
+-- Combat Modified stat calls
+-- All dynamic modifiers to combat pools should be applied here
+function _M:getCombatOffense()
+	local dice = self:getOffense()
+	local sides = self.offense_sides
+	local modifier = self.offense_target_modifier
+	local pack_table = {dice = dice, sides = sides, modifier = modifier}
+	return pack_table
+end
+function _M:getCombatDefense()
+	local dice = self:getDefense()
+	local sides = self.defense_sides
+	local modifier = self.defense_target_modifier
+	local pack_table = {dice = dice, sides = sides, modifier = modifier}
+	return pack_table
+end
+function _M:getCombatArmor()
+	local dice = self:getArmor()
+	local sides = self.armor_sides
+	local modifier = self.armor_target_modifier
+	local pack_table = {dice = dice, sides = sides, modifier = modifier}
+	return pack_table
+end
+function _M:getCombatDamage()
+	local dice = self:getDamage()
+	local sides = self.damage_sides
+	local modifier = self.damage_target_modifier
+	local pack_table = {dice = dice, sides = sides, modifier = modifier}
+	return pack_table
+end
+function _M:getCombatDreaming()
+	local dice = self:getDreaming()
+	local sides = self.dreaming_sides
+	local modifier = self.dreaming_target_modifier
+	local pack_table = {dice = dice, sides = sides, modifier = modifier}
+	return pack_table
+end
+function _M:getCombatReason()
+	local dice = self:getReason()
+	local sides = self.reason_sides
+	local modifier = self.reason_target_modifier
+	local pack_table = {dice = dice, sides = sides, modifier = modifier}
+	return pack_table
 end
 
 --- Dice Functions

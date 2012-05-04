@@ -69,7 +69,7 @@ function _M:run()
 	-- UI
 	self.player_display = PlayerDisplay.new(10, 0, self.w, self.h)
 	self.logdisplay = LogDisplay.new(0, self.h * 0.8, self.w * 0.5, self.h * 0.2, nil, nil, nil, {255,255,255}, {30,30,30})
-	self.hotkeys_display_icons = HotkeysIconsDisplay.new(nil, self.w *0.01, self.h * 0.91, self.w, 0, {255,255,255}, "/data/font/DroidSansMono.ttf", 10, game.h * 0.07, game.h * 0.07)
+	self.hotkeys_display_icons = HotkeysIconsDisplay.new(nil, self.w *0.01, self.h * 0.91, self.w, 0, {255,255,255}, "/data/font/DroidSansMono.ttf", 10, game.h * 0.06, game.h * 0.06)
 	self.hotkeys_display_icons:enableShadow(0.6)
 	self.tooltip = Tooltip.new(nil, nil, {255,255,255}, {30,30,30})
 

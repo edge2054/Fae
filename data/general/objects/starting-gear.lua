@@ -17,4 +17,30 @@
 -- Eric Wykoff "edge2054"
 -- edge2054@gmail.com
 
+-- Basic starting gear.  Most of this is very rare in the faery realms and very valuable.
+newEntity{
+    define_as = "BASE_PISTOL",
+    slot = "MAINHAND", offslot = "OFFHAND",
+	offslot_multiplier = { offense = 0.5, damage = 1 },
+    type = "weapon", subtype="gun",
+    display = "}", color=colors.SLATE,
+	ranged = "gun",
+	combat = { sound = "actions/gunshot", sound_miss = "actions/gunshot",},
+	rarity = 20,
+    weight = 2,
+    name = "a generic pistol",
+    desc = [[I point, pull the trigger, and things die.  Great ain't it?.]],
+}
 
+newEntity{ 
+	base = "BASE_PISTOL",
+    name = "SIG P228",
+    level_range = {1, 50},
+    cost = 500,  -- Guns are very expensive in fae
+	ammo_type = "9mm", 
+	clip_size = 13,
+	range_fall_off = 10,
+	combat = {
+		damage = 10,
+	}
+}
