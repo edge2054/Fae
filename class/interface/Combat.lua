@@ -29,11 +29,10 @@ module(..., package.seeall, class.make)
 --[[Fae Combat System
 	Fae's combat system revolves around successes.  Virtually everything is an oppossed roll between the attacker and the targets dice pools.
 	Primarily Offense vs. Defense, Damage vs. Armor, and Dreaming vs. Reason.
-	Offense vs. Defense can crit if the number of successes are greater then the defense pool resulting in extra dice being added to the Damage vs. Armor check.
+	Offense vs. Defense can crit if the number of successes is greater than the defense pool resulting in extra dice being added to the Damage vs. Armor check.
 	Dice that roll 10 or higher also explode, being rolled once more and adding to the success total (up to a maximum number of successes equal to the pool size).
 	In order to bias the game towards combat resolution oppossed rolls which result in a tie (0 net successes) will fudge the roll and return 1 success.
-	Generally dice are rolled as pool size d10 against a target of 6 but these numbers can be modified.
-	Take care though, lowering target numbers or increasing die size is generally better then increasing number of dice and balance should be taken into consideration.
+	Generally dice are rolled as (pool size)d10 against a target of 6 but these numbers can be modified (though effects that do so are extremely rare).
 ]]
 
 --- Checks what to do with the target
