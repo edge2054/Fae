@@ -77,21 +77,24 @@ function _M:cleaveTargets(target)
 	
 	-- Attack hostile targets
 	self:attackTarget(target, true)
-	if self:getActions() / 2 >= 2 then
-		if lt_hostile then
+	-- If 4 or more action points attack them both
+	if lt_hostile or rt_hostile then
+		if lt_hostile and not rt_hostile then
 			self:attackTarget(lt, true)
-		end
-		if rt_hostile then
+		elseif rt_hostile and not lt_hostile then
 			self:attackTarget(rt, true)
-		end
-	else
-		if lt_hostile and rng.chance(2) then
+		elseif lt_hostile and rt_hostile and self:getActions() / 2 < 2 then
+			if rng.chance(2) then
+				self:attackTarget(lt, true)
+			else
+				self:attackTarget(rt, true)
+			end
+		else
 			self:attackTarget(lt, true)
-		elseif rt_hostile then
 			self:attackTarget(rt, true)
 		end
 	end
-	
+		
 	self:useEnergy(game.energy_to_act)
 end
 
