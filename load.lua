@@ -30,6 +30,11 @@ local ActorTemporaryEffects = require "engine.interface.ActorTemporaryEffects"
 local Birther = require "engine.Birther"
 local Map = require "engine.Map"
 
+-- Init settings
+config.settings.fae = config.settings.fae or {}
+config.settings.fae.autosave = true
+if not config.settings.fae.smooth_move then config.settings.fae.smooth_move = 3 end
+
 -- Useful keybinds
 KeyBind:load("move,hotkeys,inventory,actions,interface,debug")
 

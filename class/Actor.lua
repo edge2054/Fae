@@ -132,6 +132,14 @@ function _M:move(x, y, force)
 			self.changed = true
 		end
 	end
+	-- smooth movement
+	if moved and not force and ox and oy and (ox ~= self.x or oy ~= self.y) and config.settings.fae.smooth_move > 0 then
+		local blur = 0
+		if self:getMovement() < self.max_movement then
+			blur = blur + (self.max_movement - self:getMovement())
+		end
+		self:setMoveAnim(ox, oy, config.settings.fae.smooth_move, blur)
+	end
 	self.did_energy = nil
 	return moved
 end
