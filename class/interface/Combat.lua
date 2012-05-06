@@ -60,7 +60,8 @@ end
 
 -- Cleave if we have enough action points
 -- Attacks foes adjacent to both you and your target
-function _M:cleaveTargets(target)
+-- No energy argument used for talent calls to this function
+function _M:cleaveTargets(target, no_energy)
 	-- Get adjacent hexes and search for viable targets
 	local dir = util.getDir(target.x, target.y, self.x, self.y)
 	if dir == 5 then return nil end
@@ -77,28 +78,34 @@ function _M:cleaveTargets(target)
 	
 	-- Attack hostile targets
 	self:attackTarget(target, true)
-	-- If 4 or more action points attack them both
+	-- check for targets
 	if lt_hostile or rt_hostile then
+		-- if just one viable target attack it
 		if lt_hostile and not rt_hostile then
 			self:attackTarget(lt, true)
 		elseif rt_hostile and not lt_hostile then
 			self:attackTarget(rt, true)
+		-- if two viable targets and less then 4 action points attack one at random
 		elseif lt_hostile and rt_hostile and self:getActions() / 2 < 2 then
 			if rng.chance(2) then
 				self:attackTarget(lt, true)
 			else
 				self:attackTarget(rt, true)
 			end
+		-- otherwise attack them both
 		else
 			self:attackTarget(lt, true)
 			self:attackTarget(rt, true)
 		end
 	end
 		
-	self:useEnergy(game.energy_to_act)
+	if not no_energy then
+		self:useEnergy(game.energy_to_act)
+	end
 end
 
 -- Attack with all available weapons
+-- No energy argument is used for talent and cleave calls
 function _M:attackTarget(target, no_energy)
 	local successes, dam
 	local mainhand, offhand
