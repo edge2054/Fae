@@ -72,7 +72,7 @@ function _M:init(t, no_default)
 	-- Default regen
 	t.life_regen = t.life_regen or 0.1
 	t.life_regen_pool = t.life_regen_pool or 0
-	t.draming_regen = t.dreaming_regen or 1
+	t.dreaming_regen = t.dreaming_regen or 1
 	t.reason_regen = t.reason_regen or 1
 	
 	
