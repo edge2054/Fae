@@ -40,7 +40,7 @@ module(..., package.seeall, class.make)
 function _M:bumpInto(target)
 	local reaction = self:reactionToward(target)
 	if reaction < 0 then
-		-- Cleave targets if we haven't moved (or haven't moved much for faster actors)
+		-- Cleave targets if we have enough action points
 		if self:getActions() >= 2 then
 			return self:cleaveTargets(target)
 		else
@@ -58,23 +58,40 @@ function _M:bumpInto(target)
 	end
 end
 
--- Cleave if movement's full
+-- Cleave if we have enough action points
 -- Attacks foes adjacent to both you and your target
 function _M:cleaveTargets(target)
-	-- Get adjacent hexes
+	-- Get adjacent hexes and search for viable targets
 	local dir = util.getDir(target.x, target.y, self.x, self.y)
 	if dir == 5 then return nil end
 	local lx, ly = util.coordAddDir(self.x, self.y, util.dirSides(dir, self.x, self.y).left)
 	local rx, ry = util.coordAddDir(self.x, self.y, util.dirSides(dir, self.x, self.y).right)
 	local lt, rt = game.level.map(lx, ly, Map.ACTOR), game.level.map(rx, ry, Map.ACTOR)
-	-- Attack hostile targets
-	self:attackTarget(target, true)
+	local lt_hostile, rt_hostile = false, false
 	if lt and self:reactionToward(lt) < 0 then
-		self:attackTarget(lt, true)
+		lt_hostile = true
 	end
 	if rt and self:reactionToward(rt) < 0 then
-		self:attackTarget(rt, true)
+		rt_hostile = true
 	end
+	
+	-- Attack hostile targets
+	self:attackTarget(target, true)
+	if self:getActions() / 2 >= 2 then
+		if lt_hostile then
+			self:attackTarget(lt, true)
+		end
+		if rt_hostile then
+			self:attackTarget(rt, true)
+		end
+	else
+		if lt_hostile and rng.chance(2) then
+			self:attackTarget(lt, true)
+		elseif rt_hostile then
+			self:attackTarget(rt, true)
+		end
+	end
+	
 	self:useEnergy(game.energy_to_act)
 end
 
