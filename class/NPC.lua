@@ -39,7 +39,7 @@ function _M:act()
 	-- Let the AI think .... beware of Shub !
 	-- If AI did nothing, use energy anyway
 	self:doAI()
-	if not self.energy.used and self.movement == self.max_movement then self:useEnergy() end
+	if not self.energy.used and self:getActions() == self:getMaxActions() then self:useEnergy() end
 end
 
 --- Called by ActorLife interface

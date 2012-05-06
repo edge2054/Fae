@@ -17,6 +17,13 @@
 -- Eric Wykoff "edge2054"
 -- edge2054@gmail.com
 
+local loadIfNot = function(f)
+	if loaded[f] then return end
+	load(f, entity_mod)
+end
+
+-- Misc
+loadIfNot("/data/general/objects/starting-gear.lua")
 
 -- These are place holders and need to be re-written
 newEntity{

@@ -52,22 +52,22 @@ function _M:init(t, no_default)
 	
 	-- Stat and Resource dice sides and target modifiers
 	self.offense_sides = 10
-	self.offense_target_modifier = 0
+	self.offense_modifier = 0
 	self.defense_sides = 10
-	self.defense_target_modifier = 0
+	self.defense_modifier = 0
 	self.damage_sides = 10
-	self.damage_target_modifier = 0
+	self.damage_modifier = 0
 	self.armor_sides = 10
-	self.armor_target_modifier = 0
+	self.armor_modifier = 0
 	self.dreaming_sides = 10
-	self.dreaming_target_modifier = 0
+	self.dreaming_modifier = 0
 	self.reason_sides = 10
-	self.reason_target_modifier = 0
+	self.reason_modifier = 0
 	
 	-- Resources
 	t.max_dreaming = t.max_dreaming or 1
 	t.max_reason = t.max_reason or 1
-	t.max_movement = t.max_movement or 2
+	t.max_actions = t.max_actions or 2
 		
 	-- Default regen
 	t.life_regen = t.life_regen or 0.1
@@ -98,8 +98,8 @@ function _M:actBase()
 	end
 	-- Regen Resources??
 	self:regenResources()
-	-- Movement resets to full each turn
-	self:regenMovement()
+	-- Action points reset to full each turn
+	self:regenActions()
 	-- Compute timed effects
 	self:timedEffects()
 	
@@ -123,10 +123,10 @@ function _M:move(x, y, force)
 	if force or self:enoughEnergy() then
 		moved = engine.Actor.move(self, x, y, force)
 		if not force and moved and (self.x ~= ox or self.y ~= oy) and not self.did_energy then
-			-- Spend movement
-			self:incMovement(-1)
-			-- If we've used all our movement end our turn
-			if self:getMovement() == 0 then
+			-- Spend actions
+			self:incActions(-1)
+			-- If we've used all our actions end our turn
+			if self:getActions() == 0 then
 				self:useEnergy()
 			end
 			self.changed = true
@@ -135,8 +135,8 @@ function _M:move(x, y, force)
 	-- smooth movement
 	if moved and not force and ox and oy and (ox ~= self.x or oy ~= self.y) and config.settings.fae.smooth_move > 0 then
 		local blur = 0
-		if self:getMovement() < self.max_movement then
-			blur = blur + (self.max_movement - self:getMovement())
+		if self:getActions() < self:getMaxActions() then
+			blur = blur + (self:getMaxActions() - self:getActions())
 		end
 		self:setMoveAnim(ox, oy, config.settings.fae.smooth_move, blur)
 	end
@@ -154,7 +154,7 @@ end
 function _M:resetToFull()
 	if self.dead then return end
 	self.life = self.max_life
-	self.movement = self.max_movement
+	self.actions = self.max_actions
 end
 
 --- Regenerate life 
@@ -174,10 +174,10 @@ function _M:regenLife()
 	end
 end
 
--- Movement resets to full each turn
-function _M:regenMovement()
+-- Actions resets to full each turn
+function _M:regenActions()
 	if self.dead then return end
-	self.movement = self.max_movement
+	self.actions = self.max_actions
 end
 
 -- Colorizes the Life display as Life goes down
@@ -208,7 +208,7 @@ Defense %s
 Damage  %s
 Armor   %s
 Life    %s/%s
-Movement %s/%s]]):format(self:colorLife(), self.name, self:getOffense(), self:getDefense(), self:getDamage(), self:getArmor(), self.life, self.max_life, self.movement, self.max_movement)
+actions %s/%s]]):format(self:colorLife(), self.name, self:getOffense(), self:getDefense(), self:getDamage(), self:getArmor(), self.life, self.max_life, self:getActions(), self:getMaxActions())
 --	self:getDisplayString(),
 --	self.level,
 --	self.life, self.life * 100 / self.max_life,

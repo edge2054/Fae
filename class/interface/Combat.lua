@@ -40,7 +40,12 @@ module(..., package.seeall, class.make)
 function _M:bumpInto(target)
 	local reaction = self:reactionToward(target)
 	if reaction < 0 then
-		return self:attackTarget(target)
+		-- Cleave targets if we haven't moved (or haven't moved much for faster actors)
+		if self:getActions() >= 2 then
+			return self:cleaveTargets(target)
+		else
+			return self:attackTarget(target)
+		end
 	elseif reaction >= 0 then
 		if self.move_others then
 			-- Displace
@@ -51,6 +56,26 @@ function _M:bumpInto(target)
 			self.x, self.y, target.x, target.y = target.x, target.y, self.x, self.y
 		end
 	end
+end
+
+-- Cleave if movement's full
+-- Attacks foes adjacent to both you and your target
+function _M:cleaveTargets(target)
+	-- Get adjacent hexes
+	local dir = util.getDir(target.x, target.y, self.x, self.y)
+	if dir == 5 then return nil end
+	local lx, ly = util.coordAddDir(self.x, self.y, util.dirSides(dir, self.x, self.y).left)
+	local rx, ry = util.coordAddDir(self.x, self.y, util.dirSides(dir, self.x, self.y).right)
+	local lt, rt = game.level.map(lx, ly, Map.ACTOR), game.level.map(rx, ry, Map.ACTOR)
+	-- Attack hostile targets
+	self:attackTarget(target, true)
+	if lt and self:reactionToward(lt) < 0 then
+		self:attackTarget(lt, true)
+	end
+	if rt and self:reactionToward(rt) < 0 then
+		self:attackTarget(rt, true)
+	end
+	self:useEnergy(game.energy_to_act)
 end
 
 -- Attack with all available weapons
@@ -84,11 +109,11 @@ function _M:attackTargetWith(target, weapon_slot)
 	-- Set some variables for our flyers
 	local dam = 0
 	-- Do we hit?  Is it a crit?
-	local offense_pool, defense_pool = self:getDicePool("offense", weapon_slot), target:getDicePool("defense")
+	local offense_pool, defense_pool = self:getDicePool(target, "offense", weapon_slot), target:getDicePool(self, "defense")
 	local successes, crit = self:doOpposedTest(self, target, offense_pool, defense_pool)
 	-- If we hit we resolve damage
 	if successes >= 0 then
-		local damage_pool, armor_pool = self:getDicePool("damage", weapon_slot), target:getDicePool("armor")
+		local damage_pool, armor_pool = self:getDicePool(target, "damage", weapon_slot), target:getDicePool(self, "armor")
 		-- Did we crit?  Bonus damage
 		if crit then
 			damage_pool.dice = damage_pool.dice + successes
@@ -113,15 +138,15 @@ function _M:attackTargetWith(target, weapon_slot)
 end
 
 -- Converts actor stats into a table to pass easily to other functions
-function _M:getDicePool(stat, weapon_slot)
+function _M:getDicePool(actor, stat, weapon_slot)
 	local define_pool = {
 		-- Get Combat Modified Stats; these functions return table values
-		offense		=	self:getCombatOffense(weapon_slot),
-		defense		=	self:getCombatDefense(),
-		armor		= 	self:getCombatArmor(),
-		damage		=	self:getCombatDamage(weapon_slot),
-		dreaming	= 	self:getCombatDreaming(), 
-		reason		=	self:getCombatReason(),
+		offense		=	self:getCombatOffense(actor, weapon_slot),
+		defense		=	self:getCombatDefense(actor),
+		armor		= 	self:getCombatArmor(actor),
+		damage		=	self:getCombatDamage(actor, weapon_slot),
+		dreaming	= 	self:getCombatDreaming(actor), 
+		reason		=	self:getCombatReason(actor),
 	}
 	return define_pool[stat]
 end
@@ -203,14 +228,17 @@ end
 -- Combat Modified stat calls; returns a table
 -- Most combat modifiers should be calculated here.
 -- Offense
-function _M:getCombatOffense(weapon_slot)
+function _M:getCombatOffense(target, weapon_slot)
 	-- Base values
 	local dice = self:getOffense()
 	local sides = self.offense_sides
-	local modifier = self.offense_target_modifier
+	local modifier = self.offense_modifier
 	
 	-- Using a weapon?
 	local weapon = self:getWeaponFromSlot(weapon_slot)
+	
+	-- Action Point modifiers?
+	local action_modifier = self:getMaxActions() - self:getActions()
 	
 	-- Weapon modifiers
 	if weapon then
@@ -222,41 +250,45 @@ function _M:getCombatOffense(weapon_slot)
 		end
 	end
 	
-	local pack_table = {dice = dice, sides = sides, modifier = modifier}
-	return pack_table
-end
-
--- Defense
-function _M:getCombatDefense()
-	-- Base values
-	local dice = self:getDefense()
-	local sides = self.defense_sides
-	local modifier = self.defense_target_modifier
+	-- Charge/Circle modifiers
+	-- Did we move this turn?
+	if (self.old_x ~= self.x or self.old_y ~= self.y) and action_modifier > 0 then
+		-- Was it a charge? (Harder to hit)
+		if core.fov.distance(self.old_x, self.old_y, target.x, target.y) > 1 then 
+			modifier = modifier + action_modifier
+		else
+			-- If not charge, circle (for easier hit)
+			modifier = modifier - action_modifier
+		end	
+	end
 	
 	local pack_table = {dice = dice, sides = sides, modifier = modifier}
 	return pack_table
 end
 
---Armor
-function _M:getCombatArmor()
+-- Defense
+function _M:getCombatDefense(src)
 	-- Base values
-	local dice = self:getArmor()
-	local sides = self.armor_sides
-	local modifier = self.armor_target_modifier
+	local dice = self:getDefense()
+	local sides = self.defense_sides
+	local modifier = self.defense_modifier
 	
 	local pack_table = {dice = dice, sides = sides, modifier = modifier}
 	return pack_table
 end
 
 -- Damage
-function _M:getCombatDamage(weapon_slot)
+function _M:getCombatDamage(target, weapon_slot)
 	-- Base values
 	local dice = self:getDamage()
 	local sides = self.damage_sides
-	local modifier = self.damage_target_modifier
+	local modifier = self.damage_modifier
 	
 	-- Using a weapon?
 	local weapon = self:getWeaponFromSlot(weapon_slot)
+	
+	-- Action Point modifiers?
+	local action_modifier = self:getMaxActions() - self:getActions()
 	
 	-- Weapon modifiers
 	if weapon then
@@ -273,27 +305,56 @@ function _M:getCombatDamage(weapon_slot)
 		dice = dice + self:attr("unarmed_damage_bonus")
 	end
 	
+	-- Charge/Circle modifiers
+	-- Did we move this turn?
+	if (self.old_x ~= self.x or self.old_y ~= self.y) and action_modifier > 0 then
+		-- Was it a charge? (Easier to deal damage)
+		if core.fov.distance(self.old_x, self.old_y, target.x, target.y) > 1 then 
+			modifier = modifier - action_modifier
+			if self == game.player then
+				game.logSeen(self, "I charged %s.", target.name:capitalize())
+			end
+		else
+			-- If not charge, circle (Harder to deal damage)
+			modifier = modifier + action_modifier
+			if self == game.player then
+				game.logSeen(self, "I circled %s.", target.name:capitalize())
+			end
+		end	
+	end
+	
+	local pack_table = {dice = dice, sides = sides, modifier = modifier}
+	return pack_table
+end
+
+--Armor
+function _M:getCombatArmor(src)
+	-- Base values
+	local dice = self:getArmor()
+	local sides = self.armor_sides
+	local modifier = self.armor_modifier
+	
 	local pack_table = {dice = dice, sides = sides, modifier = modifier}
 	return pack_table
 end
 
 -- Dreaming
-function _M:getCombatDreaming()
+function _M:getCombatDreaming(target)
 	-- Base values
 	local dice = self:getDreaming()
 	local sides = self.dreaming_sides
-	local modifier = self.dreaming_target_modifier
+	local modifier = self.dreaming_modifier
 	
 	local pack_table = {dice = dice, sides = sides, modifier = modifier}
 	return pack_table
 end
 
 -- Reason
-function _M:getCombatReason()
+function _M:getCombatReason(src)
 	-- Base values
 	local dice = self:getReason()
 	local sides = self.reason_sides
-	local modifier = self.reason_target_modifier
+	local modifier = self.reason_modifier
 	
 	local pack_table = {dice = dice, sides = sides, modifier = modifier}
 	return pack_table

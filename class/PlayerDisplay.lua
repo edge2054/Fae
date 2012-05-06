@@ -105,7 +105,7 @@ function _M:display()
 	
 	self:makeTexture(("#STEEL_BLUE#Reason:   #LAST#%d/%d   "):format(player.reason, player.max_reason), w * 0.03, h * 0.09)
 	
-	self:makeTexture(("#YELLOW#Movement:   #LAST#%d/%d   "):format(player.movement, player.max_movement), w * 0.4, h * 0.01)
+	self:makeTexture(("#YELLOW#Action Points:   #LAST#%d/%d   "):format(player:getActions(), player:getMaxActions()), w * 0.4, h * 0.01)
 
 	-- TODO: Colored Zone Names for this display
 	self:makeTexture(("%s"):format(game.zone.name), w * 0.8, h * 0.01, 240, 240, 120)
