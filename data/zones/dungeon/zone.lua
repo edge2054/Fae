@@ -23,7 +23,7 @@ return {
 	max_level = 10,
 	decay = {300, 800},
 	width = 50, height = 50,
-	ambient_music = "Danse_Sacree.ogg",
+	ambient_music = "When_Dreams_Die.ogg",
 	persistent = "zone",
 	generator =  {
 		map = {
