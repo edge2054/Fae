@@ -30,6 +30,11 @@ local ActorTemporaryEffects = require "engine.interface.ActorTemporaryEffects"
 local Birther = require "engine.Birther"
 local Map = require "engine.Map"
 
+-- Init settings
+config.settings.fae = config.settings.fae or {}
+config.settings.fae.autosave = true
+if not config.settings.fae.smooth_move then config.settings.fae.smooth_move = 3 end
+
 -- Useful keybinds
 KeyBind:load("move,hotkeys,inventory,actions,interface,debug")
 
@@ -61,6 +66,8 @@ ActorStats:defineStat("Armor",	"armor", 1, 1, 100, "Armor is my ability to avoid
 -- Actor Resources
 ActorResource:defineResource("Dreaming", "dreaming", nil, "dreaming_regen", "Dreaming represents my sense of wonder and imagination.  The higher it is the harder my fae magic will be to resist.")
 ActorResource:defineResource("Reason", "reason", nil, "reason_regen", "Reason represents my logic and higher thinking.  I use this to avoid fae magic and puzzle out problems.")
+--ActorResource:defineResource("Movement", "movement", nil, "movement_regen", "Movement represents how far I can move.")
+ActorResource:defineResource("Action Points", "actions", nil, "actions_regen", "Action points represent how much I can move or attack each turn.")
 
 -- Actor AIs
 ActorAI:loadDefinition("/engine/ai/")

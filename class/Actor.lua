@@ -47,28 +47,32 @@ module(..., package.seeall, class.inherit(
 ))
 
 function _M:init(t, no_default)
+	-- define some base values
+	self.energyBase = 0
+	
 	-- Stat and Resource dice sides and target modifiers
 	self.offense_sides = 10
-	self.offense_target_modifier = 0
+	self.offense_modifier = 0
 	self.defense_sides = 10
-	self.defense_target_modifier = 0
+	self.defense_modifier = 0
 	self.damage_sides = 10
-	self.damage_target_modifier = 0
+	self.damage_modifier = 0
 	self.armor_sides = 10
-	self.armor_target_modifier = 0
+	self.armor_modifier = 0
 	self.dreaming_sides = 10
-	self.dreaming_target_modifier = 0
+	self.dreaming_modifier = 0
 	self.reason_sides = 10
-	self.reason_target_modifier = 0
+	self.reason_modifier = 0
 	
 	-- Resources
-	t.max_dreaming = t.max_dreaming or 5
-	t.max_reason = t.max_reason or 5
+	t.max_dreaming = t.max_dreaming or 1
+	t.max_reason = t.max_reason or 1
+	t.max_actions = t.max_actions or 2
 		
 	-- Default regen
 	t.life_regen = t.life_regen or 0.1
 	t.life_regen_pool = t.life_regen_pool or 0
-	t.draming_regen = t.dreaming_regen or 1
+	t.dreaming_regen = t.dreaming_regen or 1
 	t.reason_regen = t.reason_regen or 1
 	
 	
@@ -84,25 +88,32 @@ function _M:init(t, no_default)
 	engine.interface.ActorFOV.init(self, t)
 end
 
-function _M:act()
-	if not engine.Actor.act(self) then return end
-
-	self.changed = true
-
+function _M:actBase()
+	self.energyBase = self.energyBase - game.energy_to_act
 	-- Cooldown talents
 	self:cooldownTalents()
 	-- Regen life
 	if self.life < self.max_life and self.life_regen > 0 then
 		self:regenLife()
 	end
-	-- Regen Resources??  May remove this later
+	-- Regen Resources??
 	self:regenResources()
+	-- Action points reset to full each turn
+	self:regenActions()
 	-- Compute timed effects
 	self:timedEffects()
+	
+	self.changed = true
+end
+
+function _M:act()
+	if not engine.Actor.act(self) then return end
+
+	self.changed = true
 
 	-- Still enough energy to act ?
 	if self.energy.value < game.energy_to_act then return false end
-
+	
 	return true
 end
 
@@ -111,10 +122,39 @@ function _M:move(x, y, force)
 	local ox, oy = self.x, self.y
 	if force or self:enoughEnergy() then
 		moved = engine.Actor.move(self, x, y, force)
-		if not force and moved and (self.x ~= ox or self.y ~= oy) and not self.did_energy then self:useEnergy() end
+		if not force and moved and (self.x ~= ox or self.y ~= oy) and not self.did_energy then
+			-- Spend actions
+			self:incActions(-1)
+			-- If we've used all our actions end our turn
+			if self:getActions() == 0 then
+				self:useEnergy()
+			end
+			self.changed = true
+		end
+	end
+	-- smooth movement
+	if moved and not force and ox and oy and (ox ~= self.x or oy ~= self.y) and config.settings.fae.smooth_move > 0 then
+		local blur = 0
+		if self:getActions() < self:getMaxActions() then
+			blur = blur + (self:getMaxActions() - self:getActions())
+		end
+		self:setMoveAnim(ox, oy, config.settings.fae.smooth_move, blur)
 	end
 	self.did_energy = nil
 	return moved
+end
+
+--- Call when added to a level
+-- Ensures nothing bizzare happens from our life regen method and allows us to do neat things with NPCs
+function _M:addedToLevel(level, x, y)
+	if not self._rst_full then self:resetToFull() self._rst_full = true end -- Only do it once, the first time we come into being
+	self:check("on_added_to_level", level, x, y)
+end
+
+function _M:resetToFull()
+	if self.dead then return end
+	self.life = self.max_life
+	self.actions = self.max_actions
 end
 
 --- Regenerate life 
@@ -132,6 +172,12 @@ function _M:regenLife()
 		-- and regen
 		self.life = util.bound(self.life + regen_now, self.die_at, self.max_life)
 	end
+end
+
+-- Actions resets to full each turn
+function _M:regenActions()
+	if self.dead then return end
+	self.actions = self.max_actions
 end
 
 -- Colorizes the Life display as Life goes down
@@ -161,7 +207,8 @@ Offense %s
 Defense %s
 Damage  %s
 Armor   %s
-Life    %s/%s]]):format(self:colorLife(), self.name, self:getOffense(), self:getDefense(), self:getDamage(), self:getArmor(), self.life, self.max_life)
+Life    %s/%s
+actions %s/%s]]):format(self:colorLife(), self.name, self:getOffense(), self:getDefense(), self:getDamage(), self:getArmor(), self.life, self.max_life, self:getActions(), self:getMaxActions())
 --	self:getDisplayString(),
 --	self.level,
 --	self.life, self.life * 100 / self.max_life,
@@ -189,8 +236,6 @@ end
 
 function _M:levelup()
 	self.max_life = self.max_life + 2
-
---	self:incMaxReason(3)
 
 	-- Heal upon new level
 	self.life = self.max_life
@@ -400,16 +445,4 @@ function _M:defineDisplayCallback()
 		end
 		return true
 	end)
-end
-
---- Call when added to a level
--- Ensures nothing bizzare happens from our life regen method and allows us to do neat things with NPCs
-function _M:addedToLevel(level, x, y)
-	if not self._rst_full then self:resetToFull() self._rst_full = true end -- Only do it once, the first time we come into being
-	self:check("on_added_to_level", level, x, y)
-end
-
-function _M:resetToFull()
-	if self.dead then return end
-	self.life = self.max_life
 end

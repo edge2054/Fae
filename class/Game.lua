@@ -123,7 +123,10 @@ function _M:newGame()
 		self.creating_player = false
 		print("[PLAYER BIRTH] resolved!")
 		self.player.changed = true
-		self:registerBirthProfile()
+		-- don't ask for a profile while developing
+		if not config.settings.cheat then
+			self:registerBirthProfile()
+		end
 	end)
 	self:registerDialog(birth)
 end
@@ -532,7 +535,9 @@ function _M:setupCommands()
 
 		-- Lua console, you probably want to disable it for releases
 		LUA_CONSOLE = function()
-			self:registerDialog(DebugConsole.new())
+			if config.settings.cheat then
+				self:registerDialog(DebugConsole.new())
+			end
 		end,
 
 		-- Toggle monster list

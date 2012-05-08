@@ -63,6 +63,9 @@ function _M:init(t, no_default)
 	t.lite = t.lite or 0
 	
 	t.old_life = 0
+	
+	t.max_dreaming = 5
+	t.max_reason = 5
 
 	mod.class.Actor.init(self, t, no_default)
 	engine.interface.PlayerHotkeys.init(self, t)

@@ -104,6 +104,8 @@ function _M:display()
 	self:makeTexture(("#AQUAMARINE#Dreaming: #LAST#%d/%d   "):format(player.dreaming, player.max_dreaming), w * 0.03, h * 0.05)
 	
 	self:makeTexture(("#STEEL_BLUE#Reason:   #LAST#%d/%d   "):format(player.reason, player.max_reason), w * 0.03, h * 0.09)
+	
+	self:makeTexture(("#YELLOW#Action Points:   #LAST#%d/%d   "):format(player:getActions(), player:getMaxActions()), w * 0.4, h * 0.01)
 
 	-- TODO: Colored Zone Names for this display
 	self:makeTexture(("%s"):format(game.zone.name), w * 0.8, h * 0.01, 240, 240, 120)
