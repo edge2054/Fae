@@ -19,10 +19,8 @@
 
 newEntity{
 	define_as = "HEX_BASE",
-	display_scale=1/3,
-	display_w=8,
-	display_h=3,
-	display_x=-1,
+	display_w=31/23, -- a little bit more than 4/3
+	display_x=-4/23, 
 }
 
 newEntity{
