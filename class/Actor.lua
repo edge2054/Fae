@@ -371,6 +371,17 @@ function _M:canSee(actor, def, def_pct)
 	end
 end
 
+-- Gets a weapon from a slot, takes a string and returns the weapon table
+function _M:getWeaponFromSlot(weapon_slot)
+	if not weapon_slot or not self:getInven(weapon_slot) then return end
+	local weapon = self:getInven(weapon_slot)[1]
+	if not weapon or not weapon.combat then
+		return nil
+	end
+	return weapon
+end
+
+
 --- Dice Functions
 -- Basic Success Test
 function _M:doSuccessTest(pool)

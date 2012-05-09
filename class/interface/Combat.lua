@@ -53,75 +53,121 @@ function _M:bumpInto(target)
 	end
 end
 
-function _M:doCombatFlyers(target, flyer)
+-- We handle all our fancy combat flyers right here
+function _M:doCombatFlyers(target, flyer, combat_log)
+	-- location of our flyers
 	local sx, sy = game.level.map:getTileToScreen(target.x, target.y)
 	
+	-- And throw them out
 	if flyer == "Low Action Points" then
 		game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, 2, flyer, {255,0,255}, true)
 		game.logPlayer("I don't have enough actions to do that.")
 	elseif self == game.player then
 		game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, ("%s..."):format(flyer), {255,0,255})
-		game.logPlayer(target, "%s dodged my attack.", target.name:capitalize())
+		game.logPlayer(target, "%s %s my attack.", target.name:capitalize(), combat_log)
 	elseif target == game.player then
 		game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, ("%s!"):format(flyer), {0, 255, 0})
-		game.logPlayer(target, "I dodged %s's attack.", self.name)
+		game.logPlayer(target, "I %s %s's attack.", , combat_log, self.name)
 	end
+end
+
+-- Attack with one weapon
+function _M:attackTargetWith(target, offense_modifer, damage_modifier)
+
+	-- Do we have any passed modifiers?
+	local offense_modifier = offense_modifier or 0
+	local damage_modifier = damage_modifier or 0
+	
+	-- Do we hit?  Is it a crit?
+	local hit, crit = self:doOppossedTest(self:getCombatOffense(), target:getCombatDefense())
+	
+	-- Hit?
+	if hit > 0 then
+		-- Crit?
+		if crit then
+			damage_modifier = damage_modifier + hit
+		end
+
+		-- Roll for damage
+		local dam = self:doOppossedTest(self:getCombatDamage(damage_modifier), target:getCombatArmor())
+		
+		-- If we deal damage apply it, otherwise throw out a soak flyer
+		if dam > 0 then
+			DamageType:get(DamageType.PHYSICAL).projector(src, self.x, self.y, DamageType.PHYSICAL, dam, crit)
+		else
+			self:doCombatFlyers(target, "Soaked", "soaked")
+		end
+	else
+		-- If we miss, throw out a miss flyer
+		self:doCombatFlyers(target, "Missed", "missed")
+	end
+	
 end
 
 -- Attack chain
-function _M:doCombatOffense(target, modifier)
-	-- get our base pool
-	local pool = self:getOffense() + (modifier or 0)
-	-- Penalty for being wounded?  Multiplicative so do last
+function _M:getCombatOffense(modifier)
+	-- Grab our base
+	local pool = self:getOffense()
+	
+	-- Low on life?  Do last since it's multiplicative
 	pool = math.ceil(pool * self:getLifeModifier())
-	local successes = self:doSuccessTest(pool)
-	if successes > 0 then
-		target:doCombatDefense(self, successes)
-	else
-		self:doCombatFlyers(target, "Missed")
-	end
+	
+	return pool
 end
 
-function _M:doCombatDefense(src, opposed)
+function _M:getCombatDefense()
+	-- Grab our base
 	local pool = self:getDefense()
-	local successes = self:doSuccessTest(pool)
-	local net_successes = (oppossed and oppossed - successes) or successes
-	-- hit? Ties go to the attacker
-	if net_successes >= 0 then
-		-- crit?
-		if net_successes > pool then
-			src:doCombatDamage(self, net_succeses)
-		else
-			src:doCombatDamage(self)
-		end
-	else
-		src:doCombatFlyers(self, "Missed")
-	end
+	
+	return pool
 end
 
-function _M:doCombatDamage(target, modifier)
-	local pool = self:getDamage() + (modifier or 0)
-	local successes = self:doSuccessTest(pool)
-	if successes > 0 then
-		-- did we crit earlier?
-		local crit = false
-		if modifier then
-			crit = true
-		end
-		target:doCombatArmor(self, successes, crit)
-	else
-		self:doCombatFlyers(target, "Soaked")
-	end
+function _M:doCombatDamage(modifier)
+	-- Grab our base
+	local pool = self:getDamage()
+	
+	-- Low on life?  Do last since it's multiplicative
+	pool = math.ceil(pool * self:getLifeModifier())
+	
+	return pool
 end
 
-function _M:doCombatArmor(src, opposed, crit)
+function _M:doCombatArmor()
+	-- Grab our base
 	local pool = self:getArmor()
-	local successes = self:doSuccessTest(pool)
-	local net_successes = (oppossed and oppossed - successes) or successes
-	-- hit? Ties go to the attacker
-	if net_successes > 0 then
-		DamageType:get(DamageType.PHYSICAL).projector(src, self.x, self.y, DamageType.PHYSICAL, net_successes, crit)
-	else
-		src:doCombatFlyers(self, "Soaked")
+	
+	return pool
+end
+
+--  Oppossed Success Test (sorry Adam, but it's an interface function)
+--  Rolls attacker's and target's dice pools
+--  Returns net attacker successes and crit (when attacker's successes exceed the target's pool)
+function _M:doOpposedTest(self_pool, target_pool, get_negative)
+	-- Roll some computer dice just to make Grey Happy!
+	local self_successes = self:doSuccessTest(self_pool)
+	local target_successes = target:doSuccessTest(target_pool)
+	
+	-- Compare our results
+	local net_successes = self_successes - target_successes
+	
+	-- Fudge ties towards the attacker for faster combat resolution
+	if self_successes > 1 and net_successes == 0 then
+		net_successes = 1
 	end
+	
+	-- Does the test crit?
+	-- Used for damage resolution
+	local crit = false
+	if self_successes > target_pool then
+		crit = true
+	end
+	
+	-- ensures we only return positive values or 0
+	-- if we need a negative we'll have to pass the method the get_negative argument
+	if not get_negative then
+		net_successes = math.max(0, net_successes)
+	end
+	
+	-- Alright, return our net dice and if we landed a crit
+	return net_successes, crit
 end
