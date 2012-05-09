@@ -41,6 +41,7 @@ newEntity{
 	image="terrain/tree1.png",
 	default_tile=class.new{_noalpha=false, display = '#', color_r=105, color_g=205, color_b=105},
 	display='', back_color={r=60, g=150, b=60},
+	add_displays = {class.new{image="terrain/treetop1.png", display_h=4/3, display_y=-1/6, display_scale=1, display_w=4/3, display_x=-1/6, z=2,}},
 	always_remember = true,
 	does_block_move = true,
 	can_pass = {pass_tree=1},
