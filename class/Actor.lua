@@ -51,20 +51,6 @@ function _M:init(t, no_default)
 	self.energyBase = 0
 	self.moves_this_turn = 0 -- We use this for motion blur and combat effects
 	
-	-- Stat and Resource dice sides and target modifiers
-	self.offense_sides = 10
-	self.offense_modifier = 0
-	self.defense_sides = 10
-	self.defense_modifier = 0
-	self.damage_sides = 10
-	self.damage_modifier = 0
-	self.armor_sides = 10
-	self.armor_modifier = 0
-	self.dreaming_sides = 10
-	self.dreaming_modifier = 0
-	self.reason_sides = 10
-	self.reason_modifier = 0
-	
 	-- Resources
 	t.max_dreaming = t.max_dreaming or 1
 	t.max_reason = t.max_reason or 1
@@ -172,6 +158,37 @@ function _M:regenLife()
 	end
 end
 
+-- Life Modifier
+-- Reduce combat pools by a percentage when wounded
+-- Also can color the Life display as Life goes down
+function _M:getLifeModifier(color_it)
+	local missing_life = self.max_life - self.life
+	local color = 'WHITE'
+	local modifier = 1
+	
+	if missing_life ~= 0 then
+		if missing_life <= self.max_life * 0.25 then
+			color = 'YELLOW'
+			modifier = 0.9
+		elseif missing_life <= self.max_life * 0.5 then
+			color = 'ORANGE'
+			modifier = 0.8
+		elseif missing_life <= self.max_life * 0.75 then
+			color = 'RED'
+			modifier = 0.7
+		else
+			color = 'DARK_RED'
+			modifier = 0.6
+		end
+	end
+	
+	if color_it then
+		return color
+	else
+		return modifier
+	end
+end
+
 -- We use action points instead of energy to simulate multiple actions per turn
 -- When action points hit 0 we end our turn
 function _M:useActionPoints(value)
@@ -181,24 +198,6 @@ function _M:useActionPoints(value)
 	end	
 end
 
--- Colorizes the Life display as Life goes down
-function _M:colorLife()
-	local missing_life = self.max_life - self.life
-	local color
-	
-	if missing_life == 0 then
-		color = 'WHITE'
-	elseif missing_life <= self.max_life * 0.25 then
-		color = 'YELLOW'
-	elseif missing_life <= self.max_life * 0.5 then
-		color = 'ORANGE'
-	elseif missing_life <= self.max_life * 0.75 then
-		color = 'RED'
-	else
-		color = 'DARK_RED'
-	end
-	return color
-end
 
 -- TODO: VERBOSE when holding down control?
 -- Some of this is just for debugging for now
@@ -209,7 +208,7 @@ Defense %s
 Damage  %s
 Armor   %s
 Life    %s/%s
-actions %s/%s]]):format(self:colorLife(), self.name, self:getOffense(), self:getDefense(), self:getDamage(), self:getArmor(), self.life, self.max_life, self:getActions(), self:getMaxActions())
+actions %s/%s]]):format(self:getLifeModifier(true), self.name, self:getOffense(), self:getDefense(), self:getDamage(), self:getArmor(), self.life, self.max_life, self:getActions(), self:getMaxActions())
 --	self:getDisplayString(),
 --	self.level,
 --	self.life, self.life * 100 / self.max_life,
@@ -370,6 +369,25 @@ function _M:canSee(actor, def, def_pct)
 	else
 		return true, 100
 	end
+end
+
+--- Dice Functions
+-- Basic Success Test
+function _M:doSuccessTest(pool)
+	local successes = 0
+	local dice = pool
+	while dice > 0 and successes < pool do
+		local roll = rng.dice(1, 10)
+		if roll >= 6 then
+			successes = successes + 1
+		end
+		if roll < 10 then
+			dice = dice - 1
+		end
+	end
+	
+	print(("%s rolled %dd10.  %d successes achieved."):format(self.name:capitalize(), pool, successes))
+	return successes
 end
 
 --- Can the target be applied some effects

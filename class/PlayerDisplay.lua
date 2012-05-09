@@ -90,7 +90,7 @@ end
 function _M:display()
 	local player = game.player
 	if not player or not player.changed or not game.level then return end
-
+	
 	self.mouse:reset()
 	self.items = {}
 
@@ -99,11 +99,11 @@ function _M:display()
 
     local w, h = core.display.size()
 
-    self:makeTexture(("Life:     #%s#%d/%d   "):format(player:colorLife(), player.life, player.max_life), w * 0.03, h * 0.01)
+    self:makeTexture(("Life:     #%s#%d/%d   "):format(player:getLifeModifier(true), player.life, player.max_life), w * 0.03, h * 0.01)
 	
-	self:makeTexture(("#AQUAMARINE#Dreaming: #LAST#%d/%d   "):format(player.dreaming, player.max_dreaming), w * 0.03, h * 0.05)
+	self:makeTexture(("#AQUAMARINE#Dreaming: #LAST#%d/%d   "):format(player:getDreaming(), player:getMaxDreaming()), w * 0.03, h * 0.05)
 	
-	self:makeTexture(("#STEEL_BLUE#Reason:   #LAST#%d/%d   "):format(player.reason, player.max_reason), w * 0.03, h * 0.09)
+	self:makeTexture(("#STEEL_BLUE#Reason:   #LAST#%d/%d   "):format(player:getReason(), player:getMaxReason()), w * 0.03, h * 0.09)
 	
 	self:makeTexture(("#YELLOW#Action Points:   #LAST#%d/%d   "):format(player:getActions(), player:getMaxActions()), w * 0.4, h * 0.01)
 

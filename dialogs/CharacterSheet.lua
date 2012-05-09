@@ -64,18 +64,19 @@ function _M:drawDialog()
 	h = h + self.font_h + 4
 	
 	s:drawStringBlended(self.font, ("Life     : %d/%d"):format(player.life, player.max_life), w, h, 255, 255, 255, true) h = h + self.font_h + 4
-	s:drawStringBlended(self.font, ("Dreaming : %d/%d"):format(player.dreaming, player.max_dreaming), w, h, 255, 255, 255, true) h = h + self.font_h + 4
-	s:drawStringBlended(self.font, ("Reason   : %d/%d"):format(player.reason, player.max_reason), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, ("Dreaming : %d/%d"):format(player:getDreaming(), player:getMaxDreaming()), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, ("Reason   : %d/%d"):format(player:getReason(), player:getMaxReason()), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, ("Actions  : %d/%d"):format(player:getActions(), player:getMaxActions()), w, h, 255, 255, 255, true) h = h + self.font_h + 4
          
     -- Starts a new Column
     h = 0
     w = self.w * 0.25 
 	
     -- Dice pools
-	s:drawStringBlended(self.font, "Offense : "..(player:getOffense()).."d"..(player.offense_sides), w, h, 255, 255, 255, true) h = h + self.font_h + 4
-	s:drawStringBlended(self.font, "Defense : "..(player:getDefense()).."d"..(player.defense_sides), w, h, 255, 255, 255, true) h = h + self.font_h + 4
-	s:drawStringBlended(self.font, "Damage  : "..(player:getDamage()).."d"..(player.damage_sides), w, h, 255, 255, 255, true) h = h + self.font_h + 4
-	s:drawStringBlended(self.font, "Armor   : "..(player:getArmor()).."d"..(player.armor_sides), w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, "Offense : "..(player:getOffense()).."d10", w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, "Defense : "..(player:getDefense()).."d10", w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, "Damage  : "..(player:getDamage()).."d10", w, h, 255, 255, 255, true) h = h + self.font_h + 4
+	s:drawStringBlended(self.font, "Armor   : "..(player:getArmor()).."d10", w, h, 255, 255, 255, true) h = h + self.font_h + 4
     
     self.c_desc:generate()
     self.changed = false

@@ -58,8 +58,8 @@ ActorInventory:defineInventory("SHOOTER", "Shooter", true, "My ranged weapon.")
 ActorInventory:defineInventory("AMMO", "Ammo", true, "My readied ammo.")
 
 -- Actor stats
-ActorStats:defineStat("Offense","offense", 1, 1, 100, "Offense is my ability to land an attack.")
-ActorStats:defineStat("Defense","defense", 1, 1, 100, "Defense is my ability to avoid an attack.")
+ActorStats:defineStat("Offense","offense", 10, 1, 100, "Offense is my ability to land an attack.")
+ActorStats:defineStat("Defense","defense", 10, 1, 100, "Defense is my ability to avoid an attack.")
 ActorStats:defineStat("Damage",	"damage", 1, 1, 100, "Damage is my ability to kill things once I land an attack.  Generally this comes from my equipment rather than skill.")
 ActorStats:defineStat("Armor",	"armor", 1, 1, 100, "Armor is my ability to avoid damage once an attack has landed.  Generally this comes from my equipment rather than skill.")
 
