@@ -76,6 +76,14 @@ function _M:init(t, no_default)
 	engine.interface.ActorFOV.init(self, t)
 end
 
+--- Call when added to a level
+-- Ensures nothing bizzare happens from our life regen method and allows us to do neat things with NPCs
+function _M:addedToLevel(level, x, y)
+	if not self._rst_full then self:resetToFull() self._rst_full = true end -- Only do it once, the first time we come into being
+	self:check("on_added_to_level", level, x, y)
+end
+
+-- The base act method, called once per game turn
 function _M:actBase()
 	self.energyBase = self.energyBase - game.energy_to_act
 	-- Cooldown talents
@@ -101,6 +109,17 @@ function _M:act()
 	
 	return true
 end
+
+-- We use action points instead of energy to simulate multiple actions per turn
+-- When action points hit 0 we end our turn
+function _M:useActionPoints(value)
+	self:incActions(-value)
+	-- Action points should never go below zero, but just in case
+	if self:getActions() <= 0 then
+		self:useEnergy()
+	end	
+end
+
 
 function _M:move(x, y, force)
 	local moved = false
@@ -128,130 +147,27 @@ function _M:move(x, y, force)
 	return moved
 end
 
---- Call when added to a level
--- Ensures nothing bizzare happens from our life regen method and allows us to do neat things with NPCs
-function _M:addedToLevel(level, x, y)
-	if not self._rst_full then self:resetToFull() self._rst_full = true end -- Only do it once, the first time we come into being
-	self:check("on_added_to_level", level, x, y)
-end
+--- Can the actor see the target actor
+-- This does not check LOS or such, only the actual ability to see it.<br/>
+-- Check for telepathy, invisibility, stealth, ...
+function _M:canSee(actor, def, def_pct)
+	if not actor then return false, 0 end
 
-function _M:resetToFull()
-	if self.dead then return end
-	self.life = self.max_life
-	self.actions = self.max_actions
-end
-
---- Regenerate life 
---  Life regen only ticks when the life_regen_pool is a whole number
---  This is mostly because I'm OCD and want whole numbers!!
-function _M:regenLife()
-	-- Increase the pool size
-	self.life_regen_pool = self.life_regen_pool + self.life_regen
-	-- If the pool is greater then 1 we heal
-	if self.life_regen_pool >= 1 then
-		-- round it down
-		local regen_now = math.floor(self.life_regen_pool)
-		-- but keep the decimal
-		self.life_regen_pool = self.life_regen_pool - regen_now
-		-- and regen
-		self.life = util.bound(self.life + regen_now, self.die_at, self.max_life)
-	end
-end
-
--- Life Modifier
--- Reduce combat pools by a percentage when wounded
--- Also can color the Life display as Life goes down
-function _M:getLifeModifier(color_it)
-	local missing_life = self.max_life - self.life
-	local color = 'WHITE'
-	local modifier = 1
-	
-	if missing_life ~= 0 then
-		if missing_life <= self.max_life * 0.25 then
-			color = 'YELLOW'
-			modifier = 0.9
-		elseif missing_life <= self.max_life * 0.5 then
-			color = 'ORANGE'
-			modifier = 0.8
-		elseif missing_life <= self.max_life * 0.75 then
-			color = 'RED'
-			modifier = 0.7
-		else
-			color = 'DARK_RED'
-			modifier = 0.6
+	-- Check for stealth. Checks against the target cunning and level
+	if actor:attr("stealth") and actor ~= self then
+		local def = self.level / 2 + self:getCun(25)
+		local hit, chance = self:checkHit(def, actor:attr("stealth") + (actor:attr("inc_stealth") or 0), 0, 100)
+		if not hit then
+			return false, chance
 		end
 	end
-	
-	if color_it then
-		return color
+
+	if def ~= nil then
+		return def, def_pct
 	else
-		return modifier
+		return true, 100
 	end
 end
-
--- We use action points instead of energy to simulate multiple actions per turn
--- When action points hit 0 we end our turn
-function _M:useActionPoints(value)
-	self:incActions(-value)
-	if self:getActions() <= 0 then
-		self:useEnergy()
-	end	
-end
-
-
--- TODO: VERBOSE when holding down control?
--- Some of this is just for debugging for now
-function _M:tooltip()
-	return ([[#%s#%s#LAST#
-Offense %s
-Defense %s
-Damage  %s
-Armor   %s
-Life    %s/%s
-actions %s/%s]]):format(self:getLifeModifier(true), self.name, self:getOffense(), self:getDefense(), self:getDamage(), self:getArmor(), self.life, self.max_life, self:getActions(), self:getMaxActions())
---	self:getDisplayString(),
---	self.level,
---	self.life, self.life * 100 / self.max_life,
---	self:getStr(),
---	self:getDex(),
---	self:getCon(),
---	self.desc or ""
-	
-end
-
-function _M:onTakeHit(value, src)
-	return value
-end
-
-function _M:die(src)
-	engine.interface.ActorLife.die(self, src)
-
-	-- Gives the killer some exp for the kill
-	if src and src.gainExp then
-		src:gainExp(self:worthExp(src))
-	end
-
-	return true
-end
-
-function _M:levelup()
-	self.max_life = self.max_life + 2
-
-	-- Heal upon new level
-	self.life = self.max_life
-end
-
---- Notifies a change of stat value
-function _M:onStatChange(stat, v)
-	if stat == self.STAT_CON then
-		self.max_life = self.max_life + 2
-	end
-end
-
-function _M:attack(target)
-	self:bumpInto(target)
-end
-
 
 --- Called before a talent is used
 -- Check the actor can cast it
@@ -337,6 +253,71 @@ function _M:getTalentFullDescription(t)
 	return table.concat(d, "\n").."\n#6fff83#Description: #FFFFFF#"..t.info(self, t)
 end
 
+-- Not sure we're using this, maybe the AI uses it?
+function _M:attack(target)
+	self:bumpInto(target)
+end
+
+-- Shields and other various effects that are triggered when we take damage but before life is removed
+function _M:onTakeHit(value, src)
+	return value
+end
+
+-- Called when we come back from the dead and what not
+function _M:resetToFull()
+	if self.dead then return end
+	self.life = self.max_life
+	self.actions = self.max_actions
+end
+
+--- Regenerate life 
+--  Life regen only ticks when the life_regen_pool is a whole number
+--  This is mostly because I'm OCD and want whole numbers!!
+function _M:regenLife()
+	-- Increase the pool size
+	self.life_regen_pool = self.life_regen_pool + self.life_regen
+	-- If the pool is greater then 1 we heal
+	if self.life_regen_pool >= 1 then
+		-- round it down
+		local regen_now = math.floor(self.life_regen_pool)
+		-- but keep the decimal
+		self.life_regen_pool = self.life_regen_pool - regen_now
+		-- and regen
+		self.life = util.bound(self.life + regen_now, self.die_at, self.max_life)
+	end
+end
+
+-- Life Modifier
+-- Reduce combat pools by a percentage when wounded
+-- Also can color the Life display as Life goes down
+function _M:getLifeModifier(color_it)
+	local missing_life = self.max_life - self.life
+	local color = 'WHITE'
+	local modifier = 1
+	
+	if missing_life ~= 0 then
+		if missing_life <= self.max_life * 0.25 then
+			color = 'YELLOW'
+			modifier = 0.9
+		elseif missing_life <= self.max_life * 0.5 then
+			color = 'ORANGE'
+			modifier = 0.8
+		elseif missing_life <= self.max_life * 0.75 then
+			color = 'RED'
+			modifier = 0.7
+		else
+			color = 'DARK_RED'
+			modifier = 0.6
+		end
+	end
+	
+	if color_it then
+		return color
+	else
+		return modifier
+	end
+end
+
 --- How much experience is this actor worth
 -- @param target to whom is the exp rewarded
 -- @return the experience rewarded
@@ -349,26 +330,28 @@ function _M:worthExp(target)
 	return self.level * mult * self.exp_worth
 end
 
---- Can the actor see the target actor
--- This does not check LOS or such, only the actual ability to see it.<br/>
--- Check for telepathy, invisibility, stealth, ...
-function _M:canSee(actor, def, def_pct)
-	if not actor then return false, 0 end
+-- Die, pretty self explanatory, called when we're killed
+function _M:die(src)
+	engine.interface.ActorLife.die(self, src)
 
-	-- Check for stealth. Checks against the target cunning and level
-	if actor:attr("stealth") and actor ~= self then
-		local def = self.level / 2 + self:getCun(25)
-		local hit, chance = self:checkHit(def, actor:attr("stealth") + (actor:attr("inc_stealth") or 0), 0, 100)
-		if not hit then
-			return false, chance
-		end
+	-- Gives the killer some exp for the kill
+	if src and src.gainExp then
+		src:gainExp(self:worthExp(src))
 	end
 
-	if def ~= nil then
-		return def, def_pct
-	else
-		return true, 100
-	end
+	return true
+end
+
+--- Notifies a change of stat value
+function _M:onStatChange(stat, v)
+end
+
+-- Nothing much here yet..
+function _M:levelup()
+	self.max_life = self.max_life + 2
+
+	-- Heal upon new level
+	self.life = self.max_life
 end
 
 -- Gets a weapon from a slot, takes a string and returns the weapon table
@@ -381,6 +364,25 @@ function _M:getWeaponFromSlot(weapon_slot)
 	return weapon
 end
 
+-- TODO: VERBOSE when holding down control?
+-- Some of this is just for debugging for now
+function _M:tooltip()
+	return ([[#%s#%s#LAST#
+Offense %s
+Defense %s
+Damage  %s
+Armor   %s
+Life    %s/%s
+actions %s/%s]]):format(self:getLifeModifier(true), self.name, self:getOffense(), self:getDefense(), self:getDamage(), self:getArmor(), self.life, self.max_life, self:getActions(), self:getMaxActions())
+--	self:getDisplayString(),
+--	self.level,
+--	self.life, self.life * 100 / self.max_life,
+--	self:getStr(),
+--	self:getDex(),
+--	self:getCon(),
+--	self.desc or ""
+	
+end
 
 --- Dice Functions
 -- Basic Success Test

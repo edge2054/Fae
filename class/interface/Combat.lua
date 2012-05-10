@@ -74,7 +74,7 @@ end
 -- Attack with one weapon
 function _M:attackTargetWith(target, offense_modifer, damage_modifier)
 
-	-- Do we have any passed modifiers?
+	-- Do we have any passed modifiers from weapons or what not?
 	local offense_modifier = offense_modifier or 0
 	local damage_modifier = damage_modifier or 0
 	
