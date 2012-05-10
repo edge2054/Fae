@@ -17,5 +17,6 @@
 -- Eric Wykoff "edge2054"
 -- edge2054@gmail.com
 
+newTalentType{ type="melee/berserker", name = "berserker", description = "Berserker stance talents." }
 
-newTalentType{ type="reason/base", name = "reason", hide = true, description = "The basic talents that define reason." }
+load("/data/talents/melee/berserker.lua")

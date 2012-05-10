@@ -58,8 +58,6 @@ function _M:init(t, no_default)
 	t.subtype = t.subtype or "player"
 	t.faction = t.faction or "players"
 	
-	t.name = "Alex"
-	
 	t.lite = t.lite or 0
 	
 	t.old_life = 0

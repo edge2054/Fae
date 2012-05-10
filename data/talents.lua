@@ -74,6 +74,7 @@ newTalent{
 	end,
 }
 
+load("/data/talents/melee/base.lua")
 load("/data/talents/dreaming/base.lua")
 load("/data/talents/reason/base.lua")
 

@@ -79,9 +79,11 @@ function _M:doCombatFlyers(target, flyer)
 		else
 			game.flyers:add(sx, sy, 15, (rng.range(0,2)-1) * 0.5, -3, ("%s"):format(flyer[1]), {200,160,160})
 		end
-	elseif flyer == "Low Action Points" then
-		game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, 2, flyer, {255,0,255}, true)
-		game.logPlayer("I don't have enough actions to do that.")
+	elseif type(flyer) == "string" then
+		if flyer == "Low Action Points" then
+			game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, 2, flyer, {255,0,255}, true)
+			game.logPlayer("I don't have enough action points to do that.")
+		end
 	end
 end
 

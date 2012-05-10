@@ -17,5 +17,25 @@
 -- Eric Wykoff "edge2054"
 -- edge2054@gmail.com
 
-
-newTalentType{ type="reason/base", name = "reason", hide = true, description = "The basic talents that define reason." }
+newTalent{
+	name = "Cleave",
+	type = {"melee/berserker", 1},
+	points = 2,
+	cooldown = 6,
+	requires_target = true,
+	action_points = 20,
+	action = function(self, t)
+		local tg = {type="hit", range=self:getTalentRange(t)}
+		local x, y, target = self:getTarget(tg)
+		if not x or not y or not target then return nil end
+		if core.fov.distance(self.x, self.y, x, y) > 1 then return nil end
+		
+		self:cleaveTargets(target, true)
+		
+		return true
+	end,
+	info = function(self, t)
+		return ([[Cleave your target and up to two adjacent foes.]])
+		:format()
+	end,
+}

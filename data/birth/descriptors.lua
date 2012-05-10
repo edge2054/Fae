@@ -29,50 +29,26 @@ newBirthDescriptor{
 		lite = 3,
 		life = 20,
 		max_life = 20,
-	},
-}
-
-newBirthDescriptor{
-	type = "role",
-	name = "Hiker",
-	desc =	{
-		"While exploring some old trails I stumbled upon an area of forest unlike anything I would have ever imagined",
-	},
-	talents = {
-		-- For easy testing; remove later
-		[ActorTalents.T_KICK] = 1,
-		[ActorTalents.T_ACID_SPRAY] = 1,
-	},
-	
-	copy= {
-
-	},
-}
-
-newBirthDescriptor{
-	type = "role",
-	name = "Hippie",
-	desc =	{
-		"What a strange trip this has been",
-	},
-	talents = {
-		-- For easy testing; remove later
-		[ActorTalents.T_KICK] = 1,
-		[ActorTalents.T_ACID_SPRAY] = 1,
-	},
-}
-
-newBirthDescriptor{
-	type = "role",
-	name = "Park Ranger",
-	desc =	{
-	},
-	talents = {
-		-- For easy testing; remove later
-		[ActorTalents.T_KICK] = 1,
-		[ActorTalents.T_ACID_SPRAY] = 1,
-	},
-	copy = {
 		resolvers.equip{ {type="weapon", subtype="handaxe", name="an old rusty hatchet"}, },
+	},
+	talents = {
+		[ActorTalents.T_CLEAVE] = 1,
+	},
+}
+
+
+newBirthDescriptor{
+	type = "sex",
+	name = "Man",
+	desc =	{
+		"Charms and compulsions may effect men and women differently depending on the sex of the caster but otherwise there's no gameplay difference in this choice.",
+	},
+}
+
+newBirthDescriptor{
+	type = "sex",
+	name = "Woman",
+	desc =	{
+		"Charms and compulsions may effect men and women differently depending on the sex of the caster but otherwise there's no gameplay difference in this choice.",
 	},
 }

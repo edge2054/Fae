@@ -1,5 +1,5 @@
--- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009, 2010, 2011, 2012 Nicolas Casalini
+-- Fae
+-- Copyright (C) 2012 Eric Wykoff
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -14,7 +14,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 --
--- Nicolas Casalini "DarkGod"
--- darkgod@te4.org
+-- Eric Wykoff "edge2054"
+-- edge2054@gmail.com
 
 newTalentType{ type="misc/base", name = "misc", hide = true, description = "Various other talents." }
+

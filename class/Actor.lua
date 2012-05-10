@@ -175,16 +175,21 @@ end
 -- @param ab the talent (not the id, the table)
 -- @return true to continue, false to stop
 function _M:preUseTalent(ab, silent)
---	if not self:enoughEnergy() then print("fail energy") return false end
-
+	if not self:enoughEnergy() then return false end
+	
+	local sx, sy = game.level.map:getTileToScreen(self.x, self.y)
+	
 	if ab.mode == "sustained" then
 		if ab.sustain_reason then
 			game.logPlayer(self, "You do not have enough reason to activate %s.", ab.name)
 			return false
 		end
 	else
-		if ab.dreaming then
-			game.logPlayer(self, "You do not have enough reason to cast %s.", ab.name)
+		if ab.action_points and self:getActions() < ab.action_points then
+			if not silent then 
+				game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, 2, "Low Action Points", {255,0,255}, true)
+				game.logPlayer("I don't have enough action points to do that.")
+			end 
 			return false
 		end
 	end
@@ -200,6 +205,7 @@ function _M:preUseTalent(ab, silent)
 		elseif ab.mode == "sustained" and self:isTalentActive(ab.id) then
 			game.logSeen(self, "%s deactivates %s.", self.name:capitalize(), ab.name)
 		else
+			game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, 2, ("%s"):format(ab.name), {244,221,26})
 			game.logSeen(self, "%s uses %s.", self.name:capitalize(), ab.name)
 		end
 	end
@@ -227,8 +233,8 @@ function _M:postUseTalent(ab, ret)
 			end
 		end
 	else
-		if ab.dreaming then
-
+		if ab.action_points then
+			self:useActionPoints(ab.action_points)
 		end
 	end
 
