@@ -107,6 +107,8 @@ function _M:act()
 	-- Still enough energy to act ?
 	if self.energy.value < game.energy_to_act then return false end
 	
+	if self.sound_random and rng.chance(self.sound_random_chance or 15) then game:playSoundNear(self, self.sound_random) end
+	
 	return true
 end
 
@@ -251,6 +253,8 @@ function _M:getTalentFullDescription(t)
 	else d[#d+1] = "#6fff83#Use mode: #00FF00#Activated"
 	end
 
+	if t.action_points or t.sustain_action_points then d[#d+1] = "#6fff83#Action Point Cost: #7fffd4#"..(t.action_points or t.sustain_action_points) end
+	
 	if t.reason or t.sustain_reason then d[#d+1] = "#6fff83#Reason cost: #7fffd4#"..(t.reason or t.sustain_reason) end
 	if self:getTalentRange(t) > 1 then d[#d+1] = "#6fff83#Range: #FFFFFF#"..self:getTalentRange(t)
 	else d[#d+1] = "#6fff83#Range: #FFFFFF#melee/personal"

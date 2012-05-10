@@ -30,7 +30,7 @@ newTalent{
 		if not x or not y or not target then return nil end
 		if core.fov.distance(self.x, self.y, x, y) > 1 then return nil end
 		
-		self:cleaveTargets(target, true)
+		self:cleaveTargets(target)
 		
 		return true
 	end,

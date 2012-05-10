@@ -25,6 +25,8 @@ newEntity{
 	display = "g", color=colors.WHITE,
 	desc = [[Ugly and green!]],
 
+	sound_random = {"pd/goblins/goblin-%d", 1, 15},
+	
 	ai = "dumb_talented_simple", ai_state = { talent_in=3, },
 	stats = { offense = 4, defense = 2, damage = 1, armor = 2 },
 	body = { INVEN = 10, MAINHAND = 1,},

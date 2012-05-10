@@ -101,15 +101,14 @@ function _M:attackTarget(target, no_actions)
 		if main_hand and main_hand.combat then
 			local offense_modifier = main_hand.combat.offense or 0
 			local damage_modifier = main_hand.combat.damage or 0
-			local flyer_main = self:attackTargetWith(target, offense_modifier, damage_modifier)
+			local flyer_main = self:attackTargetWith(target, offense_modifier, damage_modifier, weapon)
 			table.insert(flyer, flyer_main)
 		end
-		
 		-- Attack offhand?
 		if off_hand and off_hand.combat then
 			local offense_modifier = off_hand.combat.offense or 0
 			local damage_modifier = off_hand.combat.damage or 0
-			local flyer_off = self:attackTargetWith(target, offense_modifier, damage_modifier)
+			local flyer_off = self:attackTargetWith(target, offense_modifier, damage_modifier, weapon)
 			table.insert(flyer, flyer_off)
 		end
 	else
@@ -130,7 +129,7 @@ end
 
 -- Attack with one weapon
 -- This is the meat of the combat interface
-function _M:attackTargetWith(target, offense_modifer, damage_modifier)
+function _M:attackTargetWith(target, offense_modifer, damage_modifier, weapon)
 	local flyers
 
 	-- Do we have any passed modifiers from weapons or what not?
@@ -164,6 +163,12 @@ function _M:attackTargetWith(target, offense_modifer, damage_modifier)
 		
 		-- If we deal damage apply it, otherwise throw out a soak flyer
 		if dam > 0 then
+			if weapon and weapon.sound_hit then
+				game:playSoundNear(self, weapon.sound_hit)
+			elseif self.sound_hit then
+			else
+				game:playSoundNear(self, {"pd/hits/hit%d", 1, 37})
+			end
 			DamageType:get(DamageType.PHYSICAL).projector(self, target.x, target.y, DamageType.PHYSICAL, dam, crit)
 		else
 			flyers = "soaked"
@@ -176,10 +181,8 @@ function _M:attackTargetWith(target, offense_modifer, damage_modifier)
 end
 
 -- Special attack functions
--- Cleave if we have enough action points
--- Attacks foes adjacent to both you and your target
--- No energy argument used for talent calls to this function
-function _M:cleaveTargets(target, no_actions)
+-- Cleave foes adjacent to both you and your target
+function _M:cleaveTargets(target)
 	-- Get adjacent hexes and search for viable targets
 	local dir = util.getDir(target.x, target.y, self.x, self.y)
 	if dir == 5 then return nil end
@@ -194,10 +197,9 @@ function _M:cleaveTargets(target, no_actions)
 		rt_hostile = true
 	end
 	
-	-- Attack hostile targets
-	local action_cost = 20
+	-- Attack primary target
 	self:attackTarget(target, true)
-	-- check for targets
+	-- check for viable secondary targets
 	if lt_hostile or rt_hostile then
 		-- if just one viable target attack it
 		if lt_hostile and not rt_hostile then
@@ -208,10 +210,6 @@ function _M:cleaveTargets(target, no_actions)
 			self:attackTarget(lt, true)
 			self:attackTarget(rt, true)
 		end
-	end
-		
-	if not no_actions then
-		self:useActionPoints(20)
 	end
 end
 
