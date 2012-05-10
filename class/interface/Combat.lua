@@ -135,8 +135,20 @@ function _M:attackTargetWith(target, offense_modifer, damage_modifier)
 	local offense_modifier = offense_modifier or 0
 	local damage_modifier = damage_modifier or 0
 	
+	-- Charge?  Circle?
+	if self:attr("moved_this_turn") and self:attr("moved_this_turn") > 0 then
+		local sx, sy = game.level.map:getTileToScreen(self.x, self.y)
+		if core.fov.distance(self.old_x, self.old_y, target.x, target.y) > 1 then 
+			damage_modifier = damage_modifier + self:attr("moved_this_turn")
+			game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, 2, "Charge", {244,221,26})
+		else
+			offense_modifier = offense_modifier + self:attr("moved_this_turn")
+			game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, 2, "Circle", {244,221,26})
+		end
+	end
+	
 	-- Do we hit?  Is it a crit?
-	local hit, crit = self:doOpposedTest(target, self:getCombatOffense(offense_modifier), target:getCombatDefense())
+	local hit, crit = self:doOpposedTest(target, self:getCombatOffense(target, offense_modifier), target:getCombatDefense())
 	
 	-- Hit?
 	if hit > 0 then
@@ -146,7 +158,7 @@ function _M:attackTargetWith(target, offense_modifer, damage_modifier)
 		end
 
 		-- Roll for damage
-		local dam = self:doOpposedTest(target, self:getCombatDamage(damage_modifier), target:getCombatArmor())
+		local dam = self:doOpposedTest(target, self:getCombatDamage(target, damage_modifier), target:getCombatArmor())
 		
 		-- If we deal damage apply it, otherwise throw out a soak flyer
 		if dam > 0 then
@@ -202,13 +214,13 @@ function _M:cleaveTargets(target, no_actions)
 end
 
 -- Combat Offense
-function _M:getCombatOffense(modifier)
+function _M:getCombatOffense(target, modifier)
 	-- Grab our base
 	local pool = self:getOffense()
 	if modifier then
 		pool = pool + modifier
 	end
-	
+		
 	-- Low on life?  Do last since it's multiplicative
 	pool = math.ceil(pool * self:getLifeModifier())
 	
@@ -222,7 +234,7 @@ function _M:getCombatDefense()
 	return pool
 end
 -- Combat Damage
-function _M:getCombatDamage(modifier)
+function _M:getCombatDamage(target, modifier)
 	-- Grab our base
 	local pool = self:getDamage()
 	if modifier then

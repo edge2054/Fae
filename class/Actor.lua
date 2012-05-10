@@ -49,7 +49,7 @@ module(..., package.seeall, class.inherit(
 function _M:init(t, no_default)
 	-- define some base values
 	self.energyBase = 0
-	self.moves_this_turn = 0 -- We use this for motion blur and combat effects
+	self.moved_this_turn = 0 -- We use this for motion blur and combat effects
 	
 	-- Resources
 	t.max_dreaming = t.max_dreaming or 1
@@ -90,7 +90,7 @@ function _M:actBase()
 	self:cooldownTalents()
 	-- Regen resources, life, etc..
 	self:regenResources()
-	self:attr("moves_this_turn", 0, true)
+	self:attr("moved_this_turn", 0, true)
 	if self.life < self.max_life and self.life_regen > 0 then
 		self:regenLife()
 	end
@@ -131,15 +131,15 @@ function _M:move(x, y, force)
 		if not force and moved and (self.x ~= ox or self.y ~= oy) and not self.did_energy then
 			-- Spend actions
 			self:useActionPoints()
-			self:attr("moves_this_turn", 1)
+			self:attr("moved_this_turn", 1)
 			self.changed = true
 		end
 	end
 	-- smooth movement
 	if moved and not force and ox and oy and (ox ~= self.x or oy ~= self.y) and config.settings.fae.smooth_move > 0 then
 		local blur = 0
-		if self:attr("moves_this_turn") and self:attr("moves_this_turn") > 0 then
-			blur = blur + self.moves_this_turn
+		if self:attr("moved_this_turn") and self:attr("moved_this_turn") > 0 then
+			blur = blur + self.moved_this_turn
 		end
 		if blur > 0 then
 			self:setMoveAnim(ox, oy, config.settings.fae.smooth_move, blur)
