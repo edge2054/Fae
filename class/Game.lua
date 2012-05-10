@@ -383,8 +383,6 @@ function _M:setupCommands()
 			local co = coroutine.create(function()
 				local x, y = self.player:getTarget{type="hit", no_restrict=true, range=1, immediate_keys=true, default_target=self.player}
 				if x and y then 
-					-- Hack to get auto-explore to work with action points; drains action points when the player starts running
-			--		self.player:useActionPoints(self.player:getMaxActions())
 					self.player:runInit(util.getDir(x, y, self.player.x, self.player.y))
 				end
 			end)
@@ -412,9 +410,6 @@ function _M:setupCommands()
 					end
 				elseif not self.player:autoExplore() then
 					self.log("There is nowhere left to explore.")
-				else
-					-- Hack to get auto-explore to work with action points; drains action points when the player starts running
-					self.player:useActionPoints(self.player:getMaxActions())
 				end
 			end
 		end,

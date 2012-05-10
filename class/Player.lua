@@ -296,6 +296,13 @@ function _M:restCheck()
 	return false, "life at maximum"
 end
 
+-- Superload runStep to drop a game.paused = false in for Action Points to work
+local previous_runStep = _M.runStep
+function _M:runStep()
+	game.paused = false
+	return previous_runStep(self)
+end
+
 --- Can we continue running?
 -- We can run if no hostiles are in sight, and if we no interesting terrains are next to us
 function _M:runCheck(ignore_memory)
