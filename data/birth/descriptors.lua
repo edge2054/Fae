@@ -73,6 +73,6 @@ newBirthDescriptor{
 		[ActorTalents.T_ACID_SPRAY] = 1,
 	},
 	copy = {
-		resolvers.equip{ {type="weapon", subtype="battleaxe", name="iron battleaxe"} },
+		resolvers.equip{ {type="weapon", subtype="handaxe", name="an old rusty hatchet"}, },
 	},
 }

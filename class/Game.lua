@@ -78,7 +78,7 @@ function _M:run()
 	
 	-- Flyers
 	local flysize = 16
-	self.flyers = FlyingText.new("/data/font/DroidSansMono.ttf", flysize, "/data/font/DroidSansMono.ttf", flysize + 3)
+	self.flyers = FlyingText.new("/data/font/DroidSansMono.ttf", flysize, "/data/font/DroidSansMono.ttf", flysize  * 1.5)
 	self.flyers:enableShadow(0.6)
 	self:setFlyingText(self.flyers)
 

@@ -35,19 +35,16 @@ local function doDamageFlyers(src, x, y, type, dam, crit)
 	
 		if target:takeHit(dam, src) then
 			if src == game.player or target == game.player then
-				game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, "Kill!", {255,0,255})
+				game.flyers:add(sx, sy, 45, (rng.range(0,2)-1) * 0.5, -3, "Kill("..tostring(-math.ceil(dam))..")", {200,10,10}, true)
+				game.flyers:add(sx, sy, 100, (rng.range(0,2)-1) * 0.5, -3, "+"..tostring(target:worthExp(src)).." XP", {244,221,26})
 			end
 		elseif crit then
-			if src == game.player then
-				game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, "Crit "..tostring(-math.ceil(dam)).."!!", {0,255,0})
-			elseif target == game.player then
-				game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, "Crit "..tostring(-math.ceil(dam)).."!!", {255,0,0})
+			if src == game.player or target == game.player then
+				game.flyers:add(sx, sy, 45, (rng.range(0,2)-1) * 0.5, -3, "Crit("..tostring(-math.ceil(dam))..")", {200,10,10}, true)
 			end
 		else
-			if src == game.player then
-				game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, tostring(-math.ceil(dam)), {0,255,0})
-			elseif target == game.player then
-				game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, tostring(-math.ceil(dam)), {255,0,0})
+			if src == game.player or target == game.player  then
+				game.flyers:add(sx, sy, 45, (rng.range(0,2)-1) * 0.5, -3, tostring(-math.ceil(dam)), {188,11,49}, true)
 			end
 		end
 	end

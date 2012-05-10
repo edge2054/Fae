@@ -26,7 +26,7 @@ newEntity{
 	desc = [[Ugly and green!]],
 
 	ai = "dumb_talented_simple", ai_state = { talent_in=3, },
-	stats = { offense = 2, defense = 2, damage = 2, armor = 2 },
+	stats = { offense = 4, defense = 2, damage = 1, armor = 2 },
 	body = { INVEN = 10, MAINHAND = 1,},
 	
 }
@@ -37,7 +37,7 @@ newEntity{ base = "BASE_NPC_goblin",
 	rarity = 4,
 	max_life = resolvers.rngavg(5,9),
 	equipment = resolvers.equip{
-		{type="weapon", subtype="battleaxe", name="iron battleaxe"},
+		{type="weapon", subtype="handaxe", name="an old rusty hatchet"},
 	},
 }
 

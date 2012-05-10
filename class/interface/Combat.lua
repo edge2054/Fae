@@ -31,10 +31,10 @@ module(..., package.seeall, class.make)
 function _M:bumpInto(target)
 	local reaction = self:reactionToward(target)
 	if reaction < 0 then
-		if self:getActions() >= 20 then
-			self:doCombatOffense(target)
-			self:useActionPoints(20)
-		-- Give the player the chance to do something else
+		-- Bump attacks cost ten actions points
+		if self:getActions() >= 10 then
+			self:attackTarget(target)
+		-- Give the player the chance to do something else if something weird happens
 		elseif self == game.player then
 			self:doCombatFlyers(self, "Low Action Points")
 		-- But make the AI end it's turn
@@ -54,32 +54,89 @@ function _M:bumpInto(target)
 end
 
 -- We handle all our fancy combat flyers right here
-function _M:doCombatFlyers(target, flyer, combat_log)
+function _M:doCombatFlyers(target, flyer)
 	-- location of our flyers
 	local sx, sy = game.level.map:getTileToScreen(target.x, target.y)
-	
-	-- And throw them out
-	if flyer == "Low Action Points" then
+		
+	if type(flyer) == "table" then
+		-- Combat Log
+		if self == game.player then
+			if flyer[1] and flyer[2] then
+				game.logPlayer(target, "%s %s/%s my attack.", target.name:capitalize(), flyer[1], flyer[2])
+			else
+				game.logPlayer(target, "%s %s my attack.", target.name:capitalize(), flyer[1])
+			end
+		elseif target == game.player then
+			if flyer[1] and flyer[2] then
+				game.logPlayer(target, "I %s/%s %s's attack.", flyer[1], flyer[2], self.name)
+			else
+				game.logPlayer(target, "I %s %s's attack.", flyer[1], self.name)
+			end
+		end
+		-- Flyers!!
+		if flyer[1] and flyer[2] then
+			game.flyers:add(sx, sy, 15, (rng.range(0,2)-1) * 0.5, -3, ("%s/%s"):format(flyer[1], flyer[2]), {200,160,160})
+		else
+			game.flyers:add(sx, sy, 15, (rng.range(0,2)-1) * 0.5, -3, ("%s"):format(flyer[1]), {200,160,160})
+		end
+	elseif flyer == "Low Action Points" then
 		game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, 2, flyer, {255,0,255}, true)
 		game.logPlayer("I don't have enough actions to do that.")
-	elseif self == game.player then
-		game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, ("%s..."):format(flyer), {255,0,255})
-		game.logPlayer(target, "%s %s my attack.", target.name:capitalize(), combat_log)
-	elseif target == game.player then
-		game.flyers:add(sx, sy, 30, (rng.range(0,2)-1) * 0.5, -3, ("%s!"):format(flyer), {0, 255, 0})
-		game.logPlayer(target, "I %s %s's attack.", , combat_log, self.name)
+	end
+end
+
+-- Attack with all available weapons
+-- No energy argument is used for talents
+function _M:attackTarget(target, no_actions)
+	-- Grab our weapons
+	local main_hand = self:getWeaponFromSlot("MAINHAND")
+	local off_hand = self:getWeaponFromSlot("OFFHAND")
+
+	local flyer = {}
+	
+	if main_hand or off_hand then
+		-- Attack mainhand?
+		if main_hand and main_hand.combat then
+			local offense_modifier = main_hand.combat.offense or 0
+			local damage_modifier = main_hand.combat.damage or 0
+			local flyer_main = self:attackTargetWith(target, offense_modifier, damage_modifier)
+			table.insert(flyer, flyer_main)
+		end
+		
+		-- Attack offhand?
+		if off_hand and off_hand.combat then
+			local offense_modifier = off_hand.combat.offense or 0
+			local damage_modifier = off_hand.combat.damage or 0
+			local flyer_off = self:attackTargetWith(target, offense_modifier, damage_modifier)
+			table.insert(flyer, flyer_off)
+		end
+	else
+		-- If we didn't attack with a mainhand or offhand weapon we can always do an unarmed attack
+		-- Even if our hands are full (at least for now)
+		local flyer_unarmed = self:attackTargetWith(target, offense_modifier, damage_modifier)
+		table.insert(flyer, flyer_unarmed)
+	end
+	
+	if flyer[1] then
+		self:doCombatFlyers(target, flyer)
+	end
+	
+	if not no_actions then
+		self:useActionPoints()
 	end
 end
 
 -- Attack with one weapon
+-- This is the meat of the combat interface
 function _M:attackTargetWith(target, offense_modifer, damage_modifier)
+	local flyers
 
 	-- Do we have any passed modifiers from weapons or what not?
 	local offense_modifier = offense_modifier or 0
 	local damage_modifier = damage_modifier or 0
 	
 	-- Do we hit?  Is it a crit?
-	local hit, crit = self:doOppossedTest(self:getCombatOffense(), target:getCombatDefense())
+	local hit, crit = self:doOpposedTest(target, self:getCombatOffense(offense_modifier), target:getCombatDefense())
 	
 	-- Hit?
 	if hit > 0 then
@@ -89,50 +146,96 @@ function _M:attackTargetWith(target, offense_modifer, damage_modifier)
 		end
 
 		-- Roll for damage
-		local dam = self:doOppossedTest(self:getCombatDamage(damage_modifier), target:getCombatArmor())
+		local dam = self:doOpposedTest(target, self:getCombatDamage(damage_modifier), target:getCombatArmor())
 		
 		-- If we deal damage apply it, otherwise throw out a soak flyer
 		if dam > 0 then
-			DamageType:get(DamageType.PHYSICAL).projector(src, self.x, self.y, DamageType.PHYSICAL, dam, crit)
+			DamageType:get(DamageType.PHYSICAL).projector(self, target.x, target.y, DamageType.PHYSICAL, dam, crit)
 		else
-			self:doCombatFlyers(target, "Soaked", "soaked")
+			flyers = "soaked"
 		end
 	else
-		-- If we miss, throw out a miss flyer
-		self:doCombatFlyers(target, "Missed", "missed")
+		flyers = "dodged"
 	end
 	
+	return flyers
 end
 
--- Attack chain
+-- Special attack functions
+-- Cleave if we have enough action points
+-- Attacks foes adjacent to both you and your target
+-- No energy argument used for talent calls to this function
+function _M:cleaveTargets(target, no_actions)
+	-- Get adjacent hexes and search for viable targets
+	local dir = util.getDir(target.x, target.y, self.x, self.y)
+	if dir == 5 then return nil end
+	local lx, ly = util.coordAddDir(self.x, self.y, util.dirSides(dir, self.x, self.y).left)
+	local rx, ry = util.coordAddDir(self.x, self.y, util.dirSides(dir, self.x, self.y).right)
+	local lt, rt = game.level.map(lx, ly, Map.ACTOR), game.level.map(rx, ry, Map.ACTOR)
+	local lt_hostile, rt_hostile = false, false
+	if lt and self:reactionToward(lt) < 0 then
+		lt_hostile = true
+	end
+	if rt and self:reactionToward(rt) < 0 then
+		rt_hostile = true
+	end
+	
+	-- Attack hostile targets
+	local action_cost = 20
+	self:attackTarget(target, true)
+	-- check for targets
+	if lt_hostile or rt_hostile then
+		-- if just one viable target attack it
+		if lt_hostile and not rt_hostile then
+			self:attackTarget(lt, true)
+		elseif rt_hostile and not lt_hostile then
+			self:attackTarget(rt, true)
+		else
+			self:attackTarget(lt, true)
+			self:attackTarget(rt, true)
+		end
+	end
+		
+	if not no_actions then
+		self:useActionPoints(20)
+	end
+end
+
+-- Combat Offense
 function _M:getCombatOffense(modifier)
 	-- Grab our base
 	local pool = self:getOffense()
+	if modifier then
+		pool = pool + modifier
+	end
 	
 	-- Low on life?  Do last since it's multiplicative
 	pool = math.ceil(pool * self:getLifeModifier())
 	
 	return pool
 end
-
+-- Combat Defense
 function _M:getCombatDefense()
 	-- Grab our base
 	local pool = self:getDefense()
 	
 	return pool
 end
-
-function _M:doCombatDamage(modifier)
+-- Combat Damage
+function _M:getCombatDamage(modifier)
 	-- Grab our base
 	local pool = self:getDamage()
+	if modifier then
+		pool = pool + modifier
+	end
 	
 	-- Low on life?  Do last since it's multiplicative
 	pool = math.ceil(pool * self:getLifeModifier())
 	
 	return pool
 end
-
-function _M:doCombatArmor()
+-- Combat Armor
+function _M:getCombatArmor()
 	-- Grab our base
 	local pool = self:getArmor()
 	
@@ -142,7 +245,7 @@ end
 --  Oppossed Success Test (sorry Adam, but it's an interface function)
 --  Rolls attacker's and target's dice pools
 --  Returns net attacker successes and crit (when attacker's successes exceed the target's pool)
-function _M:doOpposedTest(self_pool, target_pool, get_negative)
+function _M:doOpposedTest(target, self_pool, target_pool, get_negative)
 	-- Roll some computer dice just to make Grey Happy!
 	local self_successes = self:doSuccessTest(self_pool)
 	local target_successes = target:doSuccessTest(target_pool)

@@ -23,7 +23,7 @@ short_name = "fae"
 author = { "edge2054", "edge2054@gmail.com" }
 homepage = "http://te4.org/modules:fae"
 version = {0,0,1}
-engine = {0,9,39,"te4"}
+engine = {0,9,40,"te4"}
 description = [[
 TODO:  Write something here.
 ]]

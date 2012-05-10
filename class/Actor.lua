@@ -113,11 +113,13 @@ end
 -- We use action points instead of energy to simulate multiple actions per turn
 -- When action points hit 0 we end our turn
 function _M:useActionPoints(value)
+	local value = value or 10
 	self:incActions(-value)
 	-- Action points should never go below zero, but just in case
 	if self:getActions() <= 0 then
 		self:useEnergy()
 	end	
+	self.changed = true
 end
 
 
@@ -128,7 +130,7 @@ function _M:move(x, y, force)
 		moved = engine.Actor.move(self, x, y, force)
 		if not force and moved and (self.x ~= ox or self.y ~= oy) and not self.did_energy then
 			-- Spend actions
-			self:useActionPoints(10)
+			self:useActionPoints()
 			self:attr("moves_this_turn", 1)
 			self.changed = true
 		end
@@ -213,7 +215,7 @@ end
 function _M:postUseTalent(ab, ret)
 	if not ret then return end
 
-	self:useEnergy()
+	self:useActionPoints()
 
 	if ab.mode == "sustained" then
 		if not self:isTalentActive(ab.id) then

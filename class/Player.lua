@@ -164,7 +164,7 @@ function _M:playerPickup()
     else
         self:pickupFloor(1, true)
         self:sortInven()
-        self:useEnergy()
+        self:useActionPoints()
 		self.changed = true
     end
 end
@@ -174,7 +174,7 @@ function _M:playerDrop()
     local d d = self:showInventory("Drop object", inven, nil, function(o, item)
         self:dropFloor(inven, item, true, true)
         self:sortInven(inven)
-        self:useEnergy()
+        self:useActionPoints()
         self.changed = true
         return true
     end)
@@ -189,7 +189,7 @@ function _M:doWear(inven, item, o)
         self:addObject(inven, o)
     end
     self:sortInven()
-    self:useEnergy()
+    self:useActionPoints()
     self.changed = true
 end
 
@@ -198,7 +198,7 @@ function _M:doTakeoff(inven, item, o)
         self:addObject(self.INVEN_INVEN, o)
     end
     self:sortInven()
-    self:useEnergy()
+    self:useActionPoints()
     self.changed = true
 end
 
