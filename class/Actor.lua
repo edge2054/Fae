@@ -118,7 +118,7 @@ function _M:useActionPoints(value)
 	-- Action points should never go below zero, but just in case
 	if self:getActions() <= 0 then
 		self:useEnergy()
-	end	
+	end
 	self.changed = true
 end
 
@@ -132,7 +132,6 @@ function _M:move(x, y, force)
 			-- Spend actions
 			self:useActionPoints()
 			self:attr("moved_this_turn", 1)
-			self.changed = true
 		end
 	end
 	-- smooth movement
@@ -176,7 +175,7 @@ end
 -- @param ab the talent (not the id, the table)
 -- @return true to continue, false to stop
 function _M:preUseTalent(ab, silent)
-	if not self:enoughEnergy() then print("fail energy") return false end
+--	if not self:enoughEnergy() then print("fail energy") return false end
 
 	if ab.mode == "sustained" then
 		if ab.sustain_reason then

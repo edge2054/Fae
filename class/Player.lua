@@ -100,7 +100,7 @@ function _M:act()
 	self.old_life = self.life
 
 	-- Resting ? Running ? Otherwise pause
-	if not self:restStep() and not self:runStep() and self.player then
+	if not self:restStep() and not self:runStep() and self.player  then
 		game.paused = true
 	end
 end
