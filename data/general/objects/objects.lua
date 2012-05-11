@@ -34,6 +34,7 @@ newEntity{
     display = "/", color=colors.SLATE,
   --  encumber = 3,
     rarity = 3,
+	combat = { sound_hit = {"weapons/swing-%d", 1, 3, vol=1}},
     name = "a generic handaxe",
     desc = [[A basic hand-axe.]],
 }

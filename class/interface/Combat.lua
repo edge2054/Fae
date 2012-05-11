@@ -31,7 +31,7 @@ module(..., package.seeall, class.make)
 function _M:bumpInto(target)
 	local reaction = self:reactionToward(target)
 	if reaction < 0 then
-		-- Bump attacks cost ten actions points
+		-- Bump attacks cost ten actions points, same as basic movement
 		if self:getActions() >= 10 then
 			self:attackTarget(target)
 		-- Give the player the chance to do something else if something weird happens
@@ -101,14 +101,14 @@ function _M:attackTarget(target, no_actions)
 		if main_hand and main_hand.combat then
 			local offense_modifier = main_hand.combat.offense or 0
 			local damage_modifier = main_hand.combat.damage or 0
-			local flyer_main = self:attackTargetWith(target, offense_modifier, damage_modifier, weapon)
+			local flyer_main = self:attackTargetWith(target, offense_modifier, damage_modifier, main_hand)
 			table.insert(flyer, flyer_main)
 		end
 		-- Attack offhand?
 		if off_hand and off_hand.combat then
 			local offense_modifier = off_hand.combat.offense or 0
 			local damage_modifier = off_hand.combat.damage or 0
-			local flyer_off = self:attackTargetWith(target, offense_modifier, damage_modifier, weapon)
+			local flyer_off = self:attackTargetWith(target, offense_modifier, damage_modifier, off_hand)
 			table.insert(flyer, flyer_off)
 		end
 	else
@@ -123,7 +123,7 @@ function _M:attackTarget(target, no_actions)
 	end
 	
 	if not no_actions then
-		self:useActionPoints()
+		self:useActionPoints(20)
 	end
 end
 
@@ -131,7 +131,7 @@ end
 -- This is the meat of the combat interface
 function _M:attackTargetWith(target, offense_modifer, damage_modifier, weapon)
 	local flyers
-
+	
 	-- Do we have any passed modifiers from weapons or what not?
 	local offense_modifier = offense_modifier or 0
 	local damage_modifier = damage_modifier or 0
@@ -157,23 +157,35 @@ function _M:attackTargetWith(target, offense_modifer, damage_modifier, weapon)
 		if crit then
 			damage_modifier = damage_modifier + hit
 		end
-
+		
+		-- Play our hit sounds
+		if weapon and weapon.combat.sound_hit then
+			game:playSoundNear(self, weapon.combat.sound_hit)
+		elseif self.sound_hit then
+			game:playSoundNear(self, self.sound_hit)
+		else
+			game:playSoundNear(self, {"weapons/hits/hit-%d", 1, 37, vol=0.4})
+		end
+		
 		-- Roll for damage
 		local dam = self:doOpposedTest(target, self:getCombatDamage(target, damage_modifier), target:getCombatArmor())
 		
 		-- If we deal damage apply it, otherwise throw out a soak flyer
 		if dam > 0 then
-			if weapon and weapon.sound_hit then
-				game:playSoundNear(self, weapon.sound_hit)
-			elseif self.sound_hit then
-			else
-				game:playSoundNear(self, {"pd/hits/hit%d", 1, 37})
-			end
 			DamageType:get(DamageType.PHYSICAL).projector(self, target.x, target.y, DamageType.PHYSICAL, dam, crit)
 		else
 			flyers = "soaked"
 		end
 	else
+		-- Play our miss sounds
+		if weapon and weapon.combat.sound_miss then
+			game:playSoundNear(self, weapon.combat.sound_miss)
+		elseif self.sound_hit then
+			game:playSoundNear(self, combat.sound_miss)
+		else
+			game:playSoundNear(self, {"weapons/swishes/swish-%d", 1, 13})
+		end
+		
 		flyers = "dodged"
 	end
 	

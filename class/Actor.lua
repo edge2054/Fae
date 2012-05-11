@@ -349,6 +349,10 @@ function _M:die(src)
 	if src and src.gainExp then
 		src:gainExp(self:worthExp(src))
 	end
+	
+	if self.sound_killed or self.sound_random then
+		game:playSoundNear(self, self.sound_killed or self.sound_random)
+	end
 
 	return true
 end

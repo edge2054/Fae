@@ -33,7 +33,7 @@ local function doDamageFlyers(src, x, y, type, dam, crit)
 			game.logSeen(target, "%s %s %s for %s%d %s#LAST# damage.", src.name:capitalize(), hit_type, target.name, DamageType:get(type).text_color or "#aaaaaa#", dam, DamageType:get(type).name)
 		end
 	
-		if target:takeHit(dam, src) then
+		if target:takeHit(dam, src) then -- Damage is applied here!!
 			if src == game.player or target == game.player then
 				game.flyers:add(sx, sy, 45, (rng.range(0,2)-1) * 0.5, -3, "Kill("..tostring(-math.ceil(dam))..")", {200,10,10}, true)
 				game.flyers:add(sx, sy, 100, (rng.range(0,2)-1) * 0.5, -3, "+"..tostring(target:worthExp(src)).." XP", {244,221,26})
@@ -41,6 +41,9 @@ local function doDamageFlyers(src, x, y, type, dam, crit)
 		elseif crit then
 			if src == game.player or target == game.player then
 				game.flyers:add(sx, sy, 45, (rng.range(0,2)-1) * 0.5, -3, "Crit("..tostring(-math.ceil(dam))..")", {200,10,10}, true)
+				if target.sound_damaged or target.sound_random then
+					game:playSoundNear(self, target.sound_damaged or target.sound_random)
+				end
 			end
 		else
 			if src == game.player or target == game.player  then
@@ -54,7 +57,10 @@ end
 setDefaultProjector(function(src, x, y, type, dam, crit)
 	local target = game.level.map(x, y, Map.ACTOR)
 	if target then
+		-- Note the actual damage happens inside the damage flyers when takeHit is called
+		-- Any thing before damage should be above this
 		doDamageFlyers(src, x, y, type, dam, crit)
+		-- Anything after below
 		return dam
 	end
 	return 0
